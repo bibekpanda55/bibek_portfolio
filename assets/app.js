@@ -2,19 +2,9 @@
   const D = window.PORTFOLIO;
   const $ = (s, r = document) => r.querySelector(s);
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-  /* ---------- timers scoped to the current case ---------- */
-  let timers = [];
-  let cleanups = [];
-  const later = (fn, ms) => { const t = setTimeout(fn, ms); timers.push(t); return t; };
-  const every = (fn, ms) => { const t = setInterval(fn, ms); timers.push(t); return t; };
-  const resetTimers = () => {
-    timers.forEach(t => { clearTimeout(t); clearInterval(t); });
-    cleanups.forEach(fn => fn());
-    timers = []; cleanups = [];
-  };
-
-  const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  /* ---------- small in-phone kit ---------- */
   const sb = (dark) => `<div class="sb" style="color:${dark ? "#fff" : "var(--ink)"}"><span>9:41</span><i></i></div>`;
   const sk = (cls) => `<span class="sk ${cls}"></span>`;
   const services = n => Array.from({ length: n }, () => `<div class="svc"><span class="ic"></span><span class="lb"></span></div>`).join("");
@@ -24,527 +14,794 @@
       <div class="col" style="flex:1">${sk(i % 2 ? "h8 w60" : "h8 w70")}${sk("h6 w40")}</div>
       ${sk("h8 w30")}
     </div>`).join("");
+  const tickIcon = (bg = "#2E9C8A", size = 52) => `<span class="circle" style="width:${size}px;height:${size}px;background:${bg};display:grid;place-items:center;margin:0 auto">
+      <svg width="${size * .46}" height="${size * .46}" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>`;
+  const chatHead = (name, sub = "online") => `${sb()}<div class="row pad" style="padding-bottom:10px;border-bottom:1px solid #EEF1F5;background:#fff">
+      <span style="font-size:16px;color:var(--muted)">‹</span>
+      <span class="circle" style="width:28px;height:28px;background:#D9DEF7"></span>
+      <div class="col" style="gap:2px"><b style="font-size:12px">${name}</b><span class="ui-sub" style="font-size:9.5px">${sub}</span></div></div>`;
+  const recv = (t, extra = "") => `<div style="align-self:flex-start;max-width:78%;background:#F2F2F2;padding:8px 10px;border-radius:14px 14px 14px 4px;position:relative;${extra}">${t}</div>`;
+  const sent = (t, quote) => `<div style="align-self:flex-end;max-width:78%;background:#6549DE;color:#fff;padding:8px 10px;border-radius:14px 14px 4px 14px">
+      ${quote ? `<div style="background:rgba(255,255,255,.14);border-left:3px solid #ECE7FF;border-radius:8px;padding:5px 8px;margin-bottom:6px">
+        <div style="font-weight:600;color:#ECE7FF;font-size:9.5px">Rahul</div><div style="color:#D0C5FF;font-size:10px">${quote}</div></div>` : ""}${t}</div>`;
+  const inputBar = (val = "", color = "#6549DE") => `<div class="row" style="padding:8px 10px 18px;background:#fff;border-top:1px solid #EEF1F5">
+      <div class="inp" style="flex:1;background:#F2F4F7;border-radius:18px;padding:9px 12px;color:${val ? "var(--ink)" : "var(--muted)"}">${val || "Message"}</div>
+      <span class="circle" style="width:30px;height:30px;background:${color};flex:none"></span></div>`;
+  const upiSheet = (title = "Pay with") => `
+    <div class="upi" style="position:absolute;left:0;right:0;bottom:0;z-index:8;background:#fff;border-radius:20px 20px 0 0;padding:10px 16px 22px;
+         box-shadow:0 -10px 30px -10px rgba(26,34,56,.4);transform:translateY(105%);transition:transform .35s cubic-bezier(.2,.8,.2,1)">
+      <span style="display:block;width:36px;height:4px;border-radius:2px;background:var(--sk-2);margin:0 auto 12px"></span>
+      <b style="font-size:12px">${title}</b>
+      <div class="row" style="justify-content:space-between;margin-top:14px">
+        ${[["#5F6368", "GPay"], ["#5F259F", "PhonePe"], ["#00BAF2", "Paytm"], ["#E9A400", "BHIM"]].map(([c, n], i) => `
+          <div class="col upi-app" data-i="${i}" style="align-items:center;gap:6px;width:52px">
+            <span style="width:40px;height:40px;border-radius:12px;background:${c};opacity:.9"></span>
+            <span style="font-size:9.5px;color:var(--ink-2)">${n}</span></div>`).join("")}
+      </div>
+    </div>`;
+  const scrim = `<div class="scrim" style="position:absolute;inset:0;background:rgba(10,14,28,.35);opacity:0;transition:opacity .3s;z-index:7;pointer-events:none"></div>`;
 
-  /* ================= screen builders ================= */
-  const builders = {
+  /* ================= demos ================= */
+  /* each demo: (el, t) where t.later / t.every are scoped timers */
+  const demos = {};
+  const befores = {};
 
-    /* ---------- 1. image carousel header ---------- */
-    carousel(b, a) {
-      b.innerHTML = `
-        <div style="height:210px;background:linear-gradient(160deg,#D5DBE4,#E7EAF0);position:relative">
-          ${sb()}
-          <div class="pad" style="margin-top:4px"><div class="searchbar">Search billers</div></div>
-          <div style="position:absolute;left:18px;bottom:22px;width:120px" class="col">${sk("h10 w100 dk")}${sk("h8 w70 dk")}</div>
-          <span class="sk dk" style="position:absolute;right:18px;bottom:16px;width:76px;height:76px;border-radius:18px"></span>
-        </div>
-        <div style="background:#fff;padding:16px 14px">
-          <div class="grid4">${services(8)}</div>
-        </div>
-        <div class="pad col" style="margin-top:14px">${sk("h10 w40")}<span class="sk" style="height:70px;border-radius:14px"></span></div>`;
-
-      const slides = [
-        { bg: "linear-gradient(160deg,#FFE3A8,#FFF3D6)", fg: "#E9A400", shape: "50%" },
-        { bg: "linear-gradient(160deg,#C9D6FF,#E6ECFF)", fg: "#4B5BD6", shape: "22px" },
-        { bg: "linear-gradient(160deg,#BFE8DE,#E2F5F0)", fg: "#2E9C8A", shape: "50% 50% 14px 50%" }
-      ];
-      a.innerHTML = `
-        <div class="car" style="height:236px;position:relative;overflow:hidden">
-          ${slides.map((s, i) => `<div class="car-bg" style="position:absolute;inset:0;background:${s.bg};opacity:${i ? 0 : 1};transition:opacity .9s ease"></div>`).join("")}
-          <div style="position:relative;z-index:2">${sb()}<div class="pad" style="margin-top:4px"><div class="searchbar">Search billers</div></div></div>
-          ${slides.map((s, i) => `
-            <div class="car-fg" style="position:absolute;inset:auto 0 62px 0;padding:0 18px;display:flex;justify-content:space-between;align-items:flex-end;z-index:2;
-                 transition:transform .9s cubic-bezier(.65,0,.35,1),opacity .9s ease;opacity:${i ? 0 : 1};transform:translateX(${i ? 60 : 0}px) scale(${i ? .96 : 1})">
-              <div class="col" style="width:118px;gap:7px">
-                <span class="sk" style="height:12px;background:rgba(26,34,56,.22)"></span>
-                <span class="sk w70" style="height:8px;background:rgba(26,34,56,.14)"></span>
-                <span style="margin-top:4px;width:56px;height:18px;border-radius:9px;background:${s.fg}"></span>
-              </div>
-              <span style="width:84px;height:84px;border-radius:${s.shape};background:${s.fg};opacity:.85"></span>
-            </div>`).join("")}
-          <div class="car-dots" style="position:absolute;bottom:58px;left:0;right:0;display:flex;justify-content:center;gap:5px;z-index:3">
-            ${slides.map((_, i) => `<i style="width:${i ? 6 : 14}px;height:6px;border-radius:3px;background:rgba(26,34,56,${i ? .25 : .7});transition:all .4s"></i>`).join("")}
+  /* ---------- Innopay: Messenger ---------- */
+  demos.messenger = (a, t) => {
+    const base = `
+      <div class="thread" style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:7px;padding:12px;overflow:hidden">
+        ${recv("Did the electricity bill go through?")}
+        ${sent("Yes, paid it this morning")}
+        ${recv("Nice. And the broadband one?")}
+        ${sent("Doing it now")}
+        ${recv("Can you send me the receipt?")}
+      </div>`;
+    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:#FAFBFC">${chatHead("Rahul")}${base}
+        <div class="preview-slot" style="overflow:hidden;height:0;transition:height .25s ease;background:#fff">
+          <div class="row" style="margin:8px 10px 0;background:#F4F1FF;border-left:3px solid #6549DE;border-radius:8px;padding:6px 10px;justify-content:space-between">
+            <div><div style="font-weight:600;color:#6657A8;font-size:10px">Replying to Rahul</div><div style="color:#6B6B6D;font-size:10px">Can you send me the receipt?</div></div>
+            <span style="color:var(--muted)">×</span>
           </div>
-        </div>
-        <div class="hl" style="position:relative;z-index:4;margin:-50px 8px 0;background:#fff;border-radius:22px;padding:16px 10px;box-shadow:0 -6px 18px -12px rgba(26,34,56,.4)">
-          <div class="grid4">${services(8)}</div>
-        </div>
-        <div class="pad col" style="margin-top:14px">${sk("h10 w40")}<span class="sk" style="height:70px;border-radius:14px"></span></div>`;
-
-      if (reduced) return;
-      let i = 0;
-      const bgs = a.querySelectorAll(".car-bg"), fgs = a.querySelectorAll(".car-fg"), dots = a.querySelectorAll(".car-dots i");
-      every(() => {
-        const prev = i; i = (i + 1) % slides.length;
-        bgs[prev].style.opacity = 0; bgs[i].style.opacity = 1;
-        fgs[prev].style.transform = "translateX(-60px) scale(.96)"; fgs[prev].style.opacity = 0;
-        fgs[i].style.transition = "none"; fgs[i].style.transform = "translateX(60px) scale(.96)";
-        void fgs[i].offsetWidth;
-        fgs[i].style.transition = ""; fgs[i].style.transform = "translateX(0) scale(1)"; fgs[i].style.opacity = 1;
-        dots.forEach((d, k) => { d.style.width = k === i ? "14px" : "6px"; d.style.background = `rgba(26,34,56,${k === i ? .7 : .25})`; });
-      }, 2800);
-    },
-
-    /* ---------- 2. sticky search header ---------- */
-    sticky(b, a) {
-      const banner = (inner) => `
-        <div style="height:200px;background:linear-gradient(160deg,#C9D6FF,#EEF1FF);position:relative">
-          ${inner}
-          <div style="position:absolute;left:16px;bottom:24px;width:130px" class="col">
-            <span class="sk" style="height:12px;background:rgba(26,34,56,.18)"></span>
-            <span class="sk w60" style="height:8px;background:rgba(26,34,56,.12)"></span>
-          </div>
-        </div>`;
-      const header = `<div class="row pad" style="padding-top:2px;padding-bottom:10px"><div class="searchbar" style="flex:1">Search billers</div><span class="circle" style="width:34px;height:34px;background:#fff;box-shadow:0 1px 2px rgba(26,34,56,.1);flex:none"></span></div>`;
-      const body = `
-        <div style="background:#fff;padding:16px 14px"><div class="grid4">${services(8)}</div></div>
-        <div class="pad" style="padding-top:14px;padding-bottom:30px">${sk("h10 w40")}${rows(9)}</div>`;
-
-      b.innerHTML = `
-        <div style="position:absolute;inset:0 0 auto 0;z-index:4">${sb()}</div>
-        <div class="scroll-y" tabindex="0" aria-label="Scrollable before screen">
-          ${banner(`<div style="height:44px"></div>${header}`)}${body}
-        </div>`;
-      a.innerHTML = `
-        <div class="scroll-y" tabindex="0" aria-label="Scrollable after screen">${banner("")}${body}</div>
-        <div class="stick hl" style="position:absolute;inset:0 0 auto 0;z-index:4;transition:background .2s, box-shadow .2s;outline-offset:-3px;border-radius:0 0 10px 10px">
-          ${sb()}${header}
-        </div>`;
-      const sc = a.querySelector(".scroll-y"), st = a.querySelector(".stick");
-      const threshold = 200 - 88;
-      const on = () => {
-        const s = sc.scrollTop > threshold;
-        st.style.background = s ? "#fff" : "transparent";
-        st.style.boxShadow = s ? "0 2px 10px rgba(0,0,0,.1)" : "none";
-      };
-      sc.addEventListener("scroll", on, { passive: true });
-      cleanups.push(() => sc.removeEventListener("scroll", on));
-    },
-
-    /* ---------- 3. recharge plan search ---------- */
-    plans(b, a) {
-      const PLANS = [
-        { p: 199, v: "28 days", d: "1.5GB/day", c: "Popular" },
-        { p: 239, v: "28 days", d: "2GB/day", c: "Popular" },
-        { p: 299, v: "28 days", d: "2GB/day", c: "Unlimited" },
-        { p: 349, v: "30 days", d: "2.5GB/day", c: "Unlimited" },
-        { p: 479, v: "56 days", d: "1.5GB/day", c: "Popular" },
-        { p: 666, v: "84 days", d: "1.5GB/day", c: "Unlimited" },
-        { p: 19, v: "1 day", d: "1GB", c: "Data" },
-        { p: 58, v: "Active plan", d: "3GB", c: "Data" }
-      ];
-      b.innerHTML = `
-        ${sb()}
-        <div class="pad" style="padding-top:6px">
-          <div class="ui-title">Recharge plans</div>
-          <div class="row" style="gap:16px;margin:12px 0 4px;color:var(--muted);font-size:11px"><b style="color:var(--ink)">Popular</b><span>Unlimited</span><span>Data</span></div>
-          ${PLANS.slice(0, 7).map(x => `
-            <div style="padding:11px 0;border-bottom:1px solid #EEF1F5" class="row">
-              <b style="font-size:13px;width:48px">₹${x.p}</b>
-              <span class="ui-sub" style="flex:1">${x.v}, ${x.d}</span>
-            </div>`).join("")}
-        </div>`;
-
-      a.innerHTML = `
-        ${sb()}
-        <div class="pad row" style="padding-top:6px;gap:10px">
-          <span class="sk circle" style="width:30px;height:30px"></span>
-          <div class="col" style="flex:1">${sk("h8 w60")}${sk("h6 w40")}</div>
-        </div>
-        <div class="hl" style="position:absolute;left:0;right:0;bottom:0;top:96px;background:#fff;border-radius:22px 22px 0 0;box-shadow:0 -8px 20px -12px rgba(26,34,56,.35);display:flex;flex-direction:column;outline-offset:-3px">
-          <span style="width:36px;height:4px;border-radius:2px;background:var(--sk-2);margin:8px auto 10px"></span>
-          <div class="pad">
-            <label class="searchbar" style="background:#F2F4F7;box-shadow:none">
-              <input class="plan-q" type="search" placeholder="Search by price, data or validity" aria-label="Search plans"
-                style="border:0;background:transparent;font:inherit;font-size:11px;width:100%;outline:none;color:var(--ink)">
-            </label>
-            <div class="plan-tabs row" style="gap:6px;margin:10px 0 6px" role="tablist">
-              ${["Popular", "Unlimited", "Data"].map((t, i) => `<button role="tab" data-c="${t}" aria-selected="${!i}"
-                style="border:0;font:600 10.5px var(--body);padding:6px 11px;border-radius:999px;cursor:pointer;
-                background:${i ? "#F2F4F7" : "linear-gradient(90deg,#1A2238,#3A4460)"};color:${i ? "var(--ink-2)" : "#fff"}">${t}</button>`).join("")}
-            </div>
-          </div>
-          <div class="plan-list pad" style="overflow-y:auto;flex:1;padding-bottom:16px;scrollbar-width:none"></div>
-        </div>`;
-
-      const q = a.querySelector(".plan-q"), list = a.querySelector(".plan-list"), tabs = a.querySelectorAll(".plan-tabs button");
-      let cat = "Popular";
-      const card = x => `
-        <div style="border:1px solid #E6EAF0;border-radius:14px;padding:11px 12px;margin-top:8px">
-          <div class="row" style="justify-content:space-between"><b style="font-size:16px">₹${x.p}</b>
-            <span style="font-size:10px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--change-soft);color:#7A5600">${x.c}</span></div>
-          <div class="row" style="gap:22px;margin-top:8px">
-            <div><div class="ui-sub">Validity</div><b style="font-size:11.5px">${x.v}</b></div>
-            <div><div class="ui-sub">Data</div><b style="font-size:11.5px">${x.d}</b></div>
-          </div>
-        </div>`;
-      const render = () => {
-        const term = q.value.trim().toLowerCase().replace(/₹/g, "");
-        let hits = term
-          ? PLANS.filter(x => `${x.p} ${x.v} ${x.d}`.toLowerCase().includes(term))
-          : PLANS.filter(x => x.c === cat);
-        if (!hits.length) {
-          const n = parseInt(term, 10);
-          const near = isNaN(n) ? PLANS.slice(0, 2) : [...PLANS].sort((m, k) => Math.abs(m.p - n) - Math.abs(k.p - n)).slice(0, 2);
-          list.innerHTML = `
-            <div style="text-align:center;padding:18px 0 4px"><b style="font-size:12px">No plan found</b>
-            <div class="ui-sub" style="margin-top:4px">Showing similar plans you can recharge with</div></div>
-            ${near.map(card).join("")}`;
-          return;
-        }
-        list.innerHTML = hits.map(card).join("");
-      };
-      tabs.forEach(t => t.addEventListener("click", () => {
-        cat = t.dataset.c; q.value = "";
-        tabs.forEach(o => {
-          const on = o === t; o.setAttribute("aria-selected", on);
-          o.style.background = on ? "linear-gradient(90deg,#1A2238,#3A4460)" : "#F2F4F7";
-          o.style.color = on ? "#fff" : "var(--ink-2)";
-        });
-        render();
-      }));
-      q.addEventListener("input", render);
-      render();
-    },
-
-    /* ---------- 4. payment confirmation ---------- */
-    confirmation(b, a) {
-      const tick = `<span class="circle" style="width:52px;height:52px;background:#2E9C8A;display:grid;place-items:center;margin:0 auto">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>`;
-      const head = `<div style="text-align:center;padding:10px 0 12px">${tick}
-        <div style="font:700 22px var(--display);margin-top:10px">₹299</div>
-        <div class="ui-sub">Paid to Electricity Board</div></div>`;
-      b.innerHTML = `
-        ${sb()}
-        <div class="pad" style="padding-top:20px">${head}
-          <div style="background:#fff;border-radius:14px;padding:4px 12px;margin-top:6px">
-            ${["Transaction ID", "Paid from", "Date", "Consumer no."].map(l => `
-              <div class="row" style="justify-content:space-between;padding:11px 0;border-bottom:1px solid #EEF1F5">
-                <span class="ui-sub">${l}</span>${sk("h8 w40")}</div>`).join("")}
-          </div>
-        </div>
-        <div class="pad" style="position:absolute;left:0;right:0;bottom:22px"><div class="ui-btn">Done</div></div>`;
-
-      const offers = ["Pay bills faster with Quick Pay", "Earn rewards on every transaction", "Special offers just for you"];
-      a.innerHTML = `
-        ${sb()}
-        <div class="pad" style="padding-top:6px">${head}
-          <div class="row" style="justify-content:space-between;background:#fff;border-radius:12px;padding:10px 12px">
-            <span style="font-weight:600">Transaction details</span><span class="ui-sub">View</span></div>
-          <div class="hl" style="margin-top:14px;padding:2px 0 0">
-            <div style="font-weight:700;font-size:12px;margin:0 2px 8px">Top services</div>
-            <div style="background:#fff;border-radius:14px;padding:12px 0 10px">
-              <div style="display:flex;gap:4px;overflow-x:auto;padding:8px 8px 0;scrollbar-width:none">
-                ${[0, 1, 2, 3, 4].map(i => `
-                  <div style="width:56px;flex:none;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative">
-                    ${i === 0 ? `<span style="position:absolute;top:-6px;z-index:1;font-size:8px;font-weight:700;background:var(--change);color:#3D2B00;padding:1px 6px;border-radius:6px">Popular</span>` : ""}
-                    <span class="circle" style="width:40px;height:40px;background:#F2F4F7;border:1px solid #E6EAF0"></span>
-                    <span class="sk h6" style="width:36px"></span>
-                  </div>`).join("")}
-              </div>
-              <div class="row" style="margin:12px 10px 0;background:#FFF8E6;border-radius:10px;padding:8px 10px;gap:8px">
-                <span class="circle" style="width:20px;height:20px;background:var(--change);color:#fff;font-weight:700;font-size:10px;display:grid;place-items:center;flex:none">%</span>
-                <div style="overflow:hidden;flex:1;height:14px;position:relative">
-                  <div class="offer-track" style="transition:transform .5s ease">
-                    ${offers.map(o => `<div style="height:14px;line-height:14px;font-size:9.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o}</div>`).join("")}
-                  </div>
-                </div>
-                <div class="offer-dots row" style="gap:3px">${offers.map((_, i) => `<i style="width:5px;height:5px;border-radius:50%;background:${i ? "#E7D7AA" : "#B88400"}"></i>`).join("")}</div>
-              </div>
-            </div>
-          </div>
-          <span class="sk" style="height:56px;border-radius:14px;margin-top:14px"></span>
-        </div>
-        <div class="pad" style="position:absolute;left:0;right:0;bottom:22px"><div class="ui-btn">Done</div></div>`;
-      if (reduced) return;
-      const track = a.querySelector(".offer-track"), dots = a.querySelectorAll(".offer-dots i");
-      let k = 0;
-      every(() => {
-        k = (k + 1) % offers.length;
-        track.style.transform = `translateY(${-14 * k}px)`;
-        dots.forEach((d, j) => d.style.background = j === k ? "#B88400" : "#E7D7AA");
-      }, 2200);
-    },
-
-    /* ---------- 5. swipe to reply ---------- */
-    reply(b, a) {
-      const chatHead = `${sb()}<div class="row pad" style="padding-bottom:10px;border-bottom:1px solid #EEF1F5;background:#fff">
-          <span style="font-size:16px;color:var(--muted)">‹</span>
-          <span class="circle" style="width:28px;height:28px;background:#D9DEF7"></span>
-          <div class="col" style="gap:2px"><b style="font-size:12px">Rahul</b><span class="ui-sub" style="font-size:9.5px">online</span></div></div>`;
-      const recv = (t, extra = "") => `<div class="msg r" style="align-self:flex-start;max-width:78%;background:#F2F2F2;padding:8px 10px;border-radius:14px 14px 14px 4px;position:relative;${extra}">${t}</div>`;
-      const sent = (t, quote) => `<div class="msg s" style="align-self:flex-end;max-width:78%;background:#6549DE;color:#fff;padding:8px 10px;border-radius:14px 14px 4px 14px">
-          ${quote ? `<div style="background:rgba(255,255,255,.14);border-left:3px solid #ECE7FF;border-radius:8px;padding:5px 8px;margin-bottom:6px">
-            <div style="font-weight:600;color:#ECE7FF;font-size:9.5px">Rahul</div><div style="color:#D0C5FF;font-size:10px">${quote}</div></div>` : ""}${t}</div>`;
-      const input = (val = "") => `<div class="row" style="padding:8px 10px 18px;background:#fff;border-top:1px solid #EEF1F5">
-          <div class="inp" style="flex:1;background:#F2F4F7;border-radius:18px;padding:9px 12px;color:${val ? "var(--ink)" : "var(--muted)"}">${val || "Message"}</div>
-          <span class="circle" style="width:30px;height:30px;background:#6549DE;flex:none"></span></div>`;
-      const base = `
-        <div class="thread" style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:7px;padding:12px;overflow:hidden">
-          ${recv("Did the electricity bill go through?")}
-          ${sent("Yes, paid it this morning")}
-          ${recv("Nice. And the broadband one?")}
-          ${sent("Doing it now")}
-          ${recv("Can you send me the receipt?")}
-        </div>`;
-      b.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:#FAFBFC">${chatHead}${base}${input()}</div>`;
-      a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:#FAFBFC">${chatHead}${base}
-          <div class="preview-slot" style="overflow:hidden;height:0;transition:height .25s ease;background:#fff">
-            <div class="row" style="margin:8px 10px 0;background:#F4F1FF;border-left:3px solid #6549DE;border-radius:8px;padding:6px 10px;justify-content:space-between">
-              <div><div style="font-weight:600;color:#6657A8;font-size:10px">Replying to Rahul</div><div style="color:#6B6B6D;font-size:10px">Can you send me the receipt?</div></div>
-              <span style="color:var(--muted)">×</span>
-            </div>
-          </div>${input()}</div>`;
-
-      const run = () => {
-        const thread = a.querySelector(".thread");
-        const last = thread.lastElementChild;
-        const slot = a.querySelector(".preview-slot");
-        const inp = a.querySelector(".inp");
-        last.style.transition = "transform .25s ease";
-        last.insertAdjacentHTML("afterbegin", `<span class="rico" style="position:absolute;left:-26px;top:50%;margin-top:-9px;width:18px;height:18px;border-radius:50%;background:#ECE7FF;color:#6549DE;font-size:11px;display:grid;place-items:center;opacity:0;transition:opacity .2s">↩</span>`);
-        const ico = last.querySelector(".rico");
-        later(() => { last.style.transform = "translateX(46px)"; ico.style.opacity = 1; }, 600);
-        later(() => { last.style.transform = ""; ico.style.opacity = 0; slot.style.height = "52px"; last.classList.add("hl"); }, 1150);
-        later(() => { inp.textContent = "Sending it now"; inp.style.color = "var(--ink)"; }, 2100);
-        later(() => {
-          slot.style.height = "0"; last.classList.remove("hl");
-          inp.textContent = "Message"; inp.style.color = "var(--muted)";
-          thread.firstElementChild.remove();
-          thread.insertAdjacentHTML("beforeend", sent("Sending it now", "Can you send me the receipt?"));
-          thread.lastElementChild.classList.add("hl");
-        }, 3100);
-        later(() => { builders.reply(b, a); }, 6200);
-      };
-      if (reduced) {
-        a.querySelector(".preview-slot").style.height = "52px";
-        return;
-      }
-      run();
-    },
-
-    /* ---------- 6. message entry animation ---------- */
-    entry(b, a) {
-      const script = [
-        ["r", "Are you coming tonight?"], ["s", "Yes! Leaving in 10"], ["r", "Great, I'll book the cab"],
-        ["s", "Split it on Innopay?"], ["r", "Sure, send a request"], ["s", "Sent ₹180"], ["r", "Got it, thanks"],
-        ["s", "See you soon"]
-      ];
-      const bubble = ([w, t]) => w === "r"
-        ? `<div style="align-self:flex-start;max-width:78%;background:#F2F2F2;padding:8px 10px;border-radius:14px 14px 14px 4px">${t}</div>`
-        : `<div style="align-self:flex-end;max-width:78%;background:#6549DE;color:#fff;padding:8px 10px;border-radius:14px 14px 4px 14px">${t}</div>`;
-      const shell = `<div style="display:flex;flex-direction:column;height:100%;background:#FAFBFC">${sb()}
-        <div class="row pad" style="padding-bottom:10px;border-bottom:1px solid #EEF1F5;background:#fff">
-          <span class="circle" style="width:28px;height:28px;background:#D9DEF7"></span><b style="font-size:12px">Priya</b></div>
-        <div class="thread" style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;overflow:hidden"></div>
-        <div style="padding:8px 10px 18px;background:#fff;border-top:1px solid #EEF1F5"><div style="background:#F2F4F7;border-radius:18px;padding:9px 12px;color:var(--muted)">Message</div></div></div>`;
-      b.innerHTML = shell; a.innerHTML = shell;
-      const tb = b.querySelector(".thread"), ta = a.querySelector(".thread");
-      const add = (i, animate) => {
-        const m = script[i % script.length];
-        const wrap = document.createElement("div");
-        wrap.style.cssText = "display:flex;flex-direction:column;padding-top:7px;overflow:hidden";
-        wrap.innerHTML = bubble(m);
-        const host = animate ? ta : tb;
-        host.appendChild(wrap);
-        while (host.children.length > 9) host.firstElementChild.remove();
-        if (animate && !reduced) {
-          const h = wrap.scrollHeight;
-          wrap.style.height = "0px";
-          wrap.style.transition = "height .3s cubic-bezier(0,0,.2,1)";
-          void wrap.offsetHeight;
-          wrap.style.height = h + "px";
-          wrap.firstElementChild.classList.add("hl");
-          later(() => { wrap.style.height = ""; wrap.firstElementChild.classList.remove("hl"); }, 700);
-        }
-      };
-      for (let i = 0; i < 3; i++) add(i, false);
-      [...tb.children].forEach(c => ta.appendChild(c.cloneNode(true)));
-      let n = 3;
-      later(() => { add(n, false); add(n, true); n++; }, 700);
-      every(() => { add(n, false); add(n, true); n++; }, 2200);
-    },
-
-    /* ---------- 7. offline ---------- */
-    offline(b, a) {
-      const screen = `${sb()}
-        <div class="net" style="position:absolute;top:46px;left:50%;transform:translateX(-50%);font-size:9.5px;font-weight:600;padding:3px 9px;border-radius:999px;background:#FDE2E4;color:#A23A48;z-index:3;transition:all .3s">Offline</div>
-        <div class="pad" style="padding-top:26px">
-          <div class="ui-title">Electricity bill</div>
-          <div class="ui-sub" style="margin-top:2px">Due in 3 days</div>
-          <div style="background:#fff;border-radius:14px;padding:14px;margin-top:12px" class="col">
-            <span class="ui-sub">Amount</span><b style="font:700 24px var(--display)">₹1,240</b>
-            <div style="margin-top:6px" class="col">${sk("h8 w70")}${sk("h8 w50")}</div>
-          </div>
-          <div class="col" style="margin-top:16px">${sk("h10 w40")}${rows(3)}</div>
-        </div>
-        <div class="pad" style="position:absolute;left:0;right:0;bottom:22px"><button class="ui-btn pay" style="width:100%;border:0;font-family:inherit;cursor:pointer">Pay ₹1,240</button></div>`;
-      b.innerHTML = screen + `<div class="snacks" style="position:absolute;left:10px;right:10px;bottom:74px;display:flex;flex-direction:column;gap:6px;z-index:6"></div>`;
-      a.innerHTML = screen + `
-        <div class="sheet hl" style="position:absolute;left:10px;right:10px;bottom:16px;z-index:6;background:#fff;border-radius:50px;padding:12px 14px;display:flex;align-items:center;gap:10px;
-             box-shadow:0 10px 30px -8px rgba(26,34,56,.35);transform:translateY(140%);transition:transform .35s cubic-bezier(.2,.8,.2,1)">
-          <span class="circle" style="width:30px;height:30px;background:#FDE2E4;display:grid;place-items:center;flex:none">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A23A48" stroke-width="2.4" stroke-linecap="round"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0"/><path d="M3 3l18 18"/></svg></span>
-          <div style="flex:1;min-width:0"><b style="font-size:11.5px">No Internet Connection</b>
-            <div class="ui-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Please check your internet connectivity</div></div>
-          <button class="ok" style="border:0;background:transparent;font:700 11.5px var(--body);color:#4B5BD6;cursor:pointer">OK</button>
-        </div>`;
-
-      let online = false;
-      const setOnline = (on) => {
-        online = on;
-        [b, a].forEach(s => {
-          const n = s.querySelector(".net");
-          n.textContent = on ? "Back online" : "Offline";
-          n.style.background = on ? "#D7F2EA" : "#FDE2E4";
-          n.style.color = on ? "#1E6E60" : "#A23A48";
-        });
-        if (on) a.querySelector(".sheet").style.transform = "translateY(140%)";
-      };
-      const snack = () => {
-        if (online) return;
-        const box = b.querySelector(".snacks");
-        const el = document.createElement("div");
-        el.style.cssText = "background:#2B3247;color:#fff;border-radius:8px;padding:10px 12px;font-size:10.5px;opacity:0;transform:translateY(8px);transition:all .25s";
-        el.textContent = "Please check your internet connectivity";
-        box.appendChild(el);
-        requestAnimationFrame(() => { el.style.opacity = 1; el.style.transform = "none"; });
-        later(() => { el.style.opacity = 0; later(() => el.remove(), 260); }, 2600);
-      };
-      const sheet = () => { if (!online) a.querySelector(".sheet").style.transform = "none"; };
-      b.querySelector(".pay").addEventListener("click", snack);
-      a.querySelector(".pay").addEventListener("click", sheet);
-      a.querySelector(".ok").addEventListener("click", () => { a.querySelector(".sheet").style.transform = "translateY(140%)"; });
-
-      later(() => { snack(); sheet(); }, 700);
-      later(() => { snack(); }, 1300);
-      later(() => { snack(); }, 1800);
-      later(() => setOnline(true), 5200);
-    }
+        </div>${inputBar()}</div>`;
+    if (reduced) { a.querySelector(".preview-slot").style.height = "52px"; return; }
+    const thread = a.querySelector(".thread"), last = thread.lastElementChild;
+    const slot = a.querySelector(".preview-slot"), inp = a.querySelector(".inp");
+    last.style.transition = "transform .25s ease";
+    last.insertAdjacentHTML("afterbegin", `<span class="rico" style="position:absolute;left:-26px;top:50%;margin-top:-9px;width:18px;height:18px;border-radius:50%;background:#ECE7FF;color:#6549DE;font-size:11px;display:grid;place-items:center;opacity:0;transition:opacity .2s">↩</span>`);
+    const ico = last.querySelector(".rico");
+    t.later(() => { last.style.transform = "translateX(46px)"; ico.style.opacity = 1; }, 700);
+    t.later(() => { last.style.transform = ""; ico.style.opacity = 0; slot.style.height = "52px"; }, 1250);
+    t.later(() => { inp.textContent = "Sending it now"; inp.style.color = "var(--ink)"; }, 2200);
+    t.later(() => {
+      slot.style.height = "0"; inp.textContent = "Message"; inp.style.color = "var(--muted)";
+      const w = document.createElement("div");
+      w.style.cssText = "display:flex;flex-direction:column;overflow:hidden;height:0;transition:height .3s cubic-bezier(0,0,.2,1)";
+      w.innerHTML = sent("Sending it now", "Can you send me the receipt?");
+      thread.appendChild(w);
+      const h = w.scrollHeight; void w.offsetHeight; w.style.height = h + "px";
+      t.later(() => thread.firstElementChild.remove(), 320);
+      t.later(() => {
+        const r = document.createElement("div");
+        r.style.cssText = "display:flex;flex-direction:column;overflow:hidden;height:0;transition:height .3s cubic-bezier(0,0,.2,1)";
+        r.innerHTML = recv("Got it, thanks!");
+        thread.appendChild(r); const rh = r.scrollHeight; void r.offsetHeight; r.style.height = rh + "px";
+        t.later(() => thread.firstElementChild.remove(), 320);
+      }, 1500);
+    }, 3200);
+    t.later(() => demos.messenger(a, t), 7600);
   };
 
-  /* ================= stage ================= */
-  const list = $("#case-list");
-  const screenB = $("#screen-before"), screenA = $("#screen-after");
-  const phones = $("#phones"), codeView = $("#code-view");
-  let current = 0, view = "screens";
+  /* ---------- Innopay: bill in chat ---------- */
+  demos.billshare = (a, t) => {
+    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:#FAFBFC;position:relative">${chatHead("Mom")}
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:7px;padding:12px;overflow:hidden">
+        ${recv("Can you pay this month's electricity?")}
+        <div class="bill" style="align-self:flex-start;width:80%;background:#fff;border:1px solid #E6EAF0;border-radius:14px;padding:12px">
+          <div class="row" style="gap:8px"><span style="width:28px;height:28px;border-radius:8px;background:#FFF3D1;display:grid;place-items:center;font-size:13px">⚡</span>
+            <div class="col" style="gap:2px"><b style="font-size:11.5px">Electricity bill</b><span class="ui-sub">Due 14 Nov</span></div></div>
+          <div class="row" style="justify-content:space-between;margin-top:10px"><span class="ui-sub">Amount</span><b style="font:700 16px var(--display)">₹1,240</b></div>
+          <button class="pay hl" style="margin-top:10px;width:100%;border:0;border-radius:10px;padding:9px;background:#6549DE;color:#fff;font:600 11.5px var(--body);cursor:pointer">Pay now</button>
+        </div>
+      </div>
+      ${inputBar()}
+      ${scrim}
+      <div class="paysheet" style="position:absolute;left:0;right:0;bottom:0;z-index:8;background:#fff;border-radius:20px 20px 0 0;padding:14px 16px 24px;transform:translateY(105%);transition:transform .35s cubic-bezier(.2,.8,.2,1)">
+        <span style="display:block;width:36px;height:4px;border-radius:2px;background:var(--sk-2);margin:0 auto 12px"></span>
+        <div class="ps-body"></div>
+      </div></div>`;
+    const sheet = a.querySelector(".paysheet"), body = a.querySelector(".ps-body"), sc = a.querySelector(".scrim");
+    const btn = a.querySelector(".pay");
+    let busy = false;
+    const run = () => {
+      if (busy) return; busy = true;
+      btn.classList.remove("hl");
+      btn.textContent = "Checking bill…"; btn.style.opacity = .75;
+      t.later(() => {
+        body.innerHTML = `<b style="font-size:12px">Pay ₹1,240</b><div class="ui-sub" style="margin-top:2px">Electricity bill, shared by Mom</div>
+          <div class="row" style="justify-content:space-between;background:#F2F4F7;border-radius:10px;padding:10px;margin-top:12px"><span>From</span><b>UPI · ••42</b></div>
+          <div class="ui-btn" style="margin-top:14px;background:#6549DE">Pay</div>`;
+        sc.style.opacity = 1; sheet.style.transform = "none";
+      }, 900);
+      t.later(() => { body.innerHTML = `<div style="padding:14px 0 6px;text-align:center">${tickIcon()}<b style="display:block;margin-top:10px;font-size:13px">Paid ₹1,240</b><div class="ui-sub">Mom will see it in the chat</div></div>`; }, 2400);
+      t.later(() => {
+        sc.style.opacity = 0; sheet.style.transform = "translateY(105%)";
+        btn.textContent = "Paid ✓"; btn.style.opacity = 1; btn.style.background = "#2E9C8A";
+      }, 3900);
+      t.later(() => demos.billshare(a, t), 7000);
+    };
+    btn.addEventListener("click", run);
+    if (!reduced) t.later(run, 1600);
+  };
 
-  const renderDiff = (file, diff) => `
-    <div class="code-file">${esc(file)}</div>
-    <div class="code-lines">${diff.split("\n").map(l => {
-      const c = l.startsWith("@@") ? "hunk" : l.startsWith("+") ? "add" : l.startsWith("-") ? "del" : "ctx";
-      return `<div class="${c}">${esc(l) || " "}</div>`;
-    }).join("")}</div>`;
+  /* ---------- Innopay: carousel home ---------- */
+  befores.carousel = (b) => {
+    b.innerHTML = `
+      <div style="height:210px;background:linear-gradient(160deg,#D5DBE4,#E7EAF0);position:relative">
+        ${sb()}
+        <div class="pad" style="margin-top:4px"><div class="searchbar">Search billers</div></div>
+        <div style="position:absolute;left:18px;bottom:22px;width:120px" class="col">${sk("h10 w100 dk")}${sk("h8 w70 dk")}</div>
+        <span class="sk dk" style="position:absolute;right:18px;bottom:16px;width:76px;height:76px;border-radius:18px"></span>
+      </div>
+      <div style="background:#fff;padding:16px 14px"><div class="grid4">${services(8)}</div></div>
+      <div class="pad col" style="margin-top:14px">${sk("h10 w40")}<span class="sk" style="height:70px;border-radius:14px"></span></div>`;
+  };
+  demos.carousel = (a, t) => {
+    const slides = [
+      { bg: "linear-gradient(160deg,#FFE3A8,#FFF3D6)", fg: "#E9A400", shape: "50%" },
+      { bg: "linear-gradient(160deg,#C9D6FF,#E6ECFF)", fg: "#4B5BD6", shape: "22px" },
+      { bg: "linear-gradient(160deg,#BFE8DE,#E2F5F0)", fg: "#2E9C8A", shape: "50% 50% 14px 50%" }
+    ];
+    a.innerHTML = `
+      <div class="scroll-y" tabindex="0" aria-label="Scrollable home screen">
+      <div class="car" style="height:236px;position:relative;overflow:hidden">
+        ${slides.map((s, i) => `<div class="car-bg" style="position:absolute;inset:0;background:${s.bg};opacity:${i ? 0 : 1};transition:opacity .9s ease"></div>`).join("")}
+        ${slides.map((s, i) => `
+          <div class="car-fg" style="position:absolute;inset:auto 0 62px 0;padding:0 18px;display:flex;justify-content:space-between;align-items:flex-end;z-index:2;
+               transition:transform .9s cubic-bezier(.65,0,.35,1),opacity .9s ease;opacity:${i ? 0 : 1};transform:translateX(${i ? 60 : 0}px) scale(${i ? .96 : 1})">
+            <div class="col" style="width:118px;gap:7px">
+              <span class="sk" style="height:12px;background:rgba(26,34,56,.22)"></span>
+              <span class="sk w70" style="height:8px;background:rgba(26,34,56,.14)"></span>
+              <span style="margin-top:4px;width:56px;height:18px;border-radius:9px;background:${s.fg}"></span>
+            </div>
+            <span style="width:84px;height:84px;border-radius:${s.shape};background:${s.fg};opacity:.85"></span>
+          </div>`).join("")}
+        <div class="car-dots" style="position:absolute;bottom:58px;left:0;right:0;display:flex;justify-content:center;gap:5px;z-index:3">
+          ${slides.map((_, i) => `<i style="width:${i ? 6 : 14}px;height:6px;border-radius:3px;background:rgba(26,34,56,${i ? .25 : .7});transition:all .4s"></i>`).join("")}
+        </div>
+      </div>
+      <div style="position:relative;z-index:4;margin:-50px 8px 0;background:#fff;border-radius:22px;padding:16px 10px;box-shadow:0 -6px 18px -12px rgba(26,34,56,.4)">
+        <div class="grid4">${services(8)}</div>
+      </div>
+      <div class="pad" style="padding-top:14px;padding-bottom:30px">${sk("h10 w40")}${rows(8)}</div>
+      </div>
+      <div class="stick" style="position:absolute;inset:0 0 auto 0;z-index:6;transition:background .2s, box-shadow .2s">
+        ${sb()}<div class="row pad" style="padding-top:2px;padding-bottom:10px"><div class="searchbar" style="flex:1">Search billers</div><span class="circle" style="width:34px;height:34px;background:#fff;box-shadow:0 1px 2px rgba(26,34,56,.1);flex:none"></span></div>
+      </div>`;
+    const sc = a.querySelector(".scroll-y"), st = a.querySelector(".stick");
+    const on = () => {
+      const s = sc.scrollTop > 140;
+      st.style.background = s ? "#fff" : "transparent";
+      st.style.boxShadow = s ? "0 2px 10px rgba(0,0,0,.1)" : "none";
+    };
+    sc.addEventListener("scroll", on, { passive: true });
+    if (reduced) return;
+    let i = 0;
+    const bgs = a.querySelectorAll(".car-bg"), fgs = a.querySelectorAll(".car-fg"), dots = a.querySelectorAll(".car-dots i");
+    t.every(() => {
+      const prev = i; i = (i + 1) % slides.length;
+      bgs[prev].style.opacity = 0; bgs[i].style.opacity = 1;
+      fgs[prev].style.transform = "translateX(-60px) scale(.96)"; fgs[prev].style.opacity = 0;
+      fgs[i].style.transition = "none"; fgs[i].style.transform = "translateX(60px) scale(.96)";
+      void fgs[i].offsetWidth;
+      fgs[i].style.transition = ""; fgs[i].style.transform = "translateX(0) scale(1)"; fgs[i].style.opacity = 1;
+      dots.forEach((d, k) => { d.style.width = k === i ? "14px" : "6px"; d.style.background = `rgba(26,34,56,${k === i ? .7 : .25})`; });
+    }, 2800);
+  };
 
-  D.cases.forEach((c, i) => {
-    const li = document.createElement("li");
-    li.innerHTML = `<button type="button" data-i="${i}">
-      <span class="dot" style="background:${D.areas[c.area]}"></span>
-      <span class="c-title">${esc(c.title)}</span>
-      <span class="c-meta">${c.area}, ${c.date.replace(/^\d+ /, "")}</span></button>`;
-    list.appendChild(li);
-  });
+  /* ---------- Innopay: recharge plans ---------- */
+  const PLANS = [
+    { p: 199, v: "28 days", d: "1.5GB/day", c: "Popular" },
+    { p: 239, v: "28 days", d: "2GB/day", c: "Popular" },
+    { p: 299, v: "28 days", d: "2GB/day", c: "Unlimited" },
+    { p: 349, v: "30 days", d: "2.5GB/day", c: "Unlimited" },
+    { p: 479, v: "56 days", d: "1.5GB/day", c: "Popular" },
+    { p: 666, v: "84 days", d: "1.5GB/day", c: "Unlimited" },
+    { p: 19, v: "1 day", d: "1GB", c: "Data" },
+    { p: 58, v: "Active plan", d: "3GB", c: "Data" }
+  ];
+  befores.plans = (b) => {
+    b.innerHTML = `${sb()}
+      <div class="pad" style="padding-top:6px">
+        <div class="ui-title">Recharge plans</div>
+        <div class="row" style="gap:16px;margin:12px 0 4px;color:var(--muted);font-size:11px"><b style="color:var(--ink)">Popular</b><span>Unlimited</span><span>Data</span></div>
+        ${PLANS.slice(0, 7).map(x => `
+          <div style="padding:11px 0;border-bottom:1px solid #EEF1F5" class="row">
+            <b style="font-size:13px;width:48px">₹${x.p}</b><span class="ui-sub" style="flex:1">${x.v}, ${x.d}</span>
+          </div>`).join("")}
+      </div>`;
+  };
+  demos.plans = (a) => {
+    a.innerHTML = `${sb()}
+      <div class="pad row" style="padding-top:6px;gap:10px">
+        <span class="sk circle" style="width:30px;height:30px"></span>
+        <div class="col" style="flex:1">${sk("h8 w60")}${sk("h6 w40")}</div>
+      </div>
+      <div style="position:absolute;left:0;right:0;bottom:0;top:96px;background:#fff;border-radius:22px 22px 0 0;box-shadow:0 -8px 20px -12px rgba(26,34,56,.35);display:flex;flex-direction:column">
+        <span style="width:36px;height:4px;border-radius:2px;background:var(--sk-2);margin:8px auto 10px"></span>
+        <div class="pad">
+          <label class="searchbar" style="background:#F2F4F7;box-shadow:none">
+            <input class="plan-q" type="search" placeholder="Search by price, data or validity" aria-label="Search plans"
+              style="border:0;background:transparent;font:inherit;font-size:11px;width:100%;outline:none;color:var(--ink)">
+          </label>
+          <div class="plan-tabs row" style="gap:6px;margin:10px 0 6px" role="tablist">
+            ${["Popular", "Unlimited", "Data"].map((x, i) => `<button role="tab" data-c="${x}" aria-selected="${!i}"
+              style="border:0;font:600 10.5px var(--body);padding:6px 11px;border-radius:999px;cursor:pointer;
+              background:${i ? "#F2F4F7" : "linear-gradient(90deg,#1A2238,#3A4460)"};color:${i ? "var(--ink-2)" : "#fff"}">${x}</button>`).join("")}
+          </div>
+        </div>
+        <div class="plan-list pad" style="overflow-y:auto;flex:1;padding-bottom:16px;scrollbar-width:none"></div>
+      </div>`;
+    const q = a.querySelector(".plan-q"), list = a.querySelector(".plan-list"), tabs = a.querySelectorAll(".plan-tabs button");
+    let cat = "Popular";
+    const card = x => `
+      <div style="border:1px solid #E6EAF0;border-radius:14px;padding:11px 12px;margin-top:8px">
+        <div class="row" style="justify-content:space-between"><b style="font-size:16px">₹${x.p}</b>
+          <span style="font-size:10px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--change-soft);color:#7A5600">${x.c}</span></div>
+        <div class="row" style="gap:22px;margin-top:8px">
+          <div><div class="ui-sub">Validity</div><b style="font-size:11.5px">${x.v}</b></div>
+          <div><div class="ui-sub">Data</div><b style="font-size:11.5px">${x.d}</b></div>
+        </div>
+      </div>`;
+    const render = () => {
+      const term = q.value.trim().toLowerCase().replace(/₹/g, "");
+      const hits = term ? PLANS.filter(x => `${x.p} ${x.v} ${x.d}`.toLowerCase().includes(term)) : PLANS.filter(x => x.c === cat);
+      if (!hits.length) {
+        const n = parseInt(term, 10);
+        const near = isNaN(n) ? PLANS.slice(0, 2) : [...PLANS].sort((m, k) => Math.abs(m.p - n) - Math.abs(k.p - n)).slice(0, 2);
+        list.innerHTML = `<div style="text-align:center;padding:18px 0 4px"><b style="font-size:12px">No plan found</b>
+          <div class="ui-sub" style="margin-top:4px">Showing similar plans you can recharge with</div></div>${near.map(card).join("")}`;
+        return;
+      }
+      list.innerHTML = hits.map(card).join("");
+    };
+    tabs.forEach(tb => tb.addEventListener("click", () => {
+      cat = tb.dataset.c; q.value = "";
+      tabs.forEach(o => {
+        const on = o === tb; o.setAttribute("aria-selected", on);
+        o.style.background = on ? "linear-gradient(90deg,#1A2238,#3A4460)" : "#F2F4F7";
+        o.style.color = on ? "#fff" : "var(--ink-2)";
+      });
+      render();
+    }));
+    q.addEventListener("input", render);
+    render();
+  };
 
-  function setView(v) {
-    view = v;
-    $("#view-screens").setAttribute("aria-selected", v === "screens");
-    $("#view-code").setAttribute("aria-selected", v === "code");
-    phones.hidden = v !== "screens";
-    phones.style.display = v === "screens" ? "" : "none";
-    codeView.hidden = v !== "code";
-    $("#replay").hidden = v !== "screens" || !D.cases[current].replay;
-  }
+  /* ---------- Innopay: payment receipt ---------- */
+  const receiptHead = `<div style="text-align:center;padding:10px 0 12px">${tickIcon()}
+      <div style="font:700 22px var(--display);margin-top:10px">₹299</div>
+      <div class="ui-sub">Paid to Electricity Board</div></div>`;
+  befores.receipt = (b) => {
+    b.innerHTML = `${sb()}
+      <div class="pad" style="padding-top:20px">${receiptHead}
+        <div style="background:#fff;border-radius:14px;padding:4px 12px;margin-top:6px">
+          ${["Transaction ID", "Paid from", "Date", "Consumer no."].map(l => `
+            <div class="row" style="justify-content:space-between;padding:11px 0;border-bottom:1px solid #EEF1F5">
+              <span class="ui-sub">${l}</span>${sk("h8 w40")}</div>`).join("")}
+        </div>
+      </div>
+      <div class="pad" style="position:absolute;left:0;right:0;bottom:22px"><div class="ui-btn">Done</div></div>`;
+  };
+  demos.receipt = (a, t) => {
+    const offers = ["Pay bills faster with Quick Pay", "Earn rewards on every transaction", "Special offers just for you"];
+    a.innerHTML = `${sb()}
+      <div class="pad" style="padding-top:6px">${receiptHead}
+        <div class="row" style="justify-content:space-between;background:#fff;border-radius:12px;padding:10px 12px">
+          <span style="font-weight:600">Transaction details</span><span class="ui-sub">View</span></div>
+        <div style="margin-top:14px">
+          <div style="font-weight:700;font-size:12px;margin:0 2px 8px">Top services</div>
+          <div style="background:#fff;border-radius:14px;padding:12px 0 10px">
+            <div style="display:flex;gap:4px;overflow-x:auto;padding:8px 8px 0;scrollbar-width:none">
+              ${[0, 1, 2, 3, 4].map(i => `
+                <div style="width:56px;flex:none;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative">
+                  ${i === 0 ? `<span style="position:absolute;top:-6px;z-index:1;font-size:8px;font-weight:700;background:var(--change);color:#3D2B00;padding:1px 6px;border-radius:6px">Popular</span>` : ""}
+                  <span class="circle" style="width:40px;height:40px;background:#F2F4F7;border:1px solid #E6EAF0"></span>
+                  <span class="sk h6" style="width:36px"></span>
+                </div>`).join("")}
+            </div>
+            <div class="row" style="margin:12px 10px 0;background:#FFF8E6;border-radius:10px;padding:8px 10px;gap:8px">
+              <span class="circle" style="width:20px;height:20px;background:var(--change);color:#fff;font-weight:700;font-size:10px;display:grid;place-items:center;flex:none">%</span>
+              <div style="overflow:hidden;flex:1;height:14px;position:relative">
+                <div class="offer-track" style="transition:transform .5s ease">
+                  ${offers.map(o => `<div style="height:14px;line-height:14px;font-size:9.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o}</div>`).join("")}
+                </div>
+              </div>
+              <div class="offer-dots row" style="gap:3px">${offers.map((_, i) => `<i style="width:5px;height:5px;border-radius:50%;background:${i ? "#E7D7AA" : "#B88400"}"></i>`).join("")}</div>
+            </div>
+          </div>
+        </div>
+        <span class="sk" style="height:56px;border-radius:14px;margin-top:14px"></span>
+      </div>
+      <div class="pad" style="position:absolute;left:0;right:0;bottom:22px"><div class="ui-btn">Done</div></div>`;
+    if (reduced) return;
+    const track = a.querySelector(".offer-track"), dots = a.querySelectorAll(".offer-dots i");
+    let k = 0;
+    t.every(() => {
+      k = (k + 1) % offers.length;
+      track.style.transform = `translateY(${-14 * k}px)`;
+      dots.forEach((d, j) => d.style.background = j === k ? "#B88400" : "#E7D7AA");
+    }, 2200);
+  };
 
-  function show(i, focusList) {
-    resetTimers();
-    current = i;
-    const c = D.cases[i];
-    list.querySelectorAll("button").forEach((btn, k) => btn.setAttribute("aria-current", k === i));
-    const stage = $("#bench-stage");
-    stage.style.setProperty("--area-color", D.areas[c.area]);
-    $("#stage-area").textContent = c.area;
-    $("#stage-title").textContent = c.title;
-    $("#stage-commit").innerHTML = `<code>${c.hash}</code> &nbsp;${c.date}, ${c.stat}`;
-    $("#hash-before").textContent = `${c.hash.slice(0, 7)}^`;
-    $("#hash-after").textContent = c.hash.slice(0, 7);
-    $("#note-before").textContent = c.before;
-    $("#note-after").textContent = c.after;
-    $("#stage-hint").textContent = c.hint || "";
-    codeView.innerHTML = renderDiff(c.code.file, c.code.diff);
-    screenB.innerHTML = ""; screenA.innerHTML = "";
-    builders[c.id](screenB, screenA);
-    setView(view);
-    if (focusList && window.innerWidth <= 1040) {
-      list.children[i].scrollIntoView({ behavior: reduced ? "auto" : "smooth", inline: "nearest", block: "nearest" });
+  /* ---------- Innopay: bus tickets ---------- */
+  demos.bus = (a, t) => {
+    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:#F7F8FA;position:relative">
+      ${sb()}
+      <div class="row pad" style="padding-bottom:10px;background:#fff;border-bottom:1px solid #EEF1F5">
+        <span style="font-size:16px;color:var(--muted)">‹</span><b style="font-size:12.5px">Bus tickets</b>
+      </div>
+      <div class="bus-body" style="flex:1;overflow:hidden;position:relative"></div>
+      ${scrim}${upiSheet("Pay ₹642 with")}
+      <div class="toast" style="position:absolute;left:12px;right:12px;bottom:18px;z-index:9;background:#1A2238;color:#fff;border-radius:12px;padding:10px 12px;font-size:10.5px;display:flex;gap:8px;align-items:center;opacity:0;transform:translateY(10px);transition:all .3s">
+        <span style="width:18px;height:22px;border-radius:3px;background:#E9A400;flex:none"></span>Ticket saved as BLR-HYD-14Nov.pdf</div>
+    </div>`;
+    const body = a.querySelector(".bus-body");
+    const route = `
+      <div class="pad" style="padding-top:12px">
+        <div style="background:#fff;border-radius:14px;padding:12px" class="col">
+          <div class="row" style="justify-content:space-between"><div><div class="ui-sub">From</div><b>Bengaluru</b></div><span style="color:var(--muted)">⇄</span><div style="text-align:right"><div class="ui-sub">To</div><b>Hyderabad</b></div></div>
+          <div class="row" style="justify-content:space-between;margin-top:6px"><span class="ui-sub">Fri, 14 Nov</span><span class="ui-sub">1 seat</span></div>
+        </div>
+        ${[["21:30", "06:15", "₹642", "AC Sleeper"], ["22:10", "07:00", "₹580", "Non-AC Sleeper"], ["23:00", "07:40", "₹720", "Volvo AC"]].map((r, i) => `
+          <div class="bus-row" style="background:#fff;border-radius:14px;padding:11px 12px;margin-top:8px;border:1px solid ${i ? "transparent" : "transparent"}">
+            <div class="row" style="justify-content:space-between"><b>${r[0]} → ${r[1]}</b><b>${r[2]}</b></div>
+            <div class="ui-sub" style="margin-top:3px">${r[3]}</div>
+          </div>`).join("")}
+      </div>`;
+    body.innerHTML = route;
+    if (reduced) return;
+    const sheet = a.querySelector(".upi"), sc = a.querySelector(".scrim"), toast = a.querySelector(".toast");
+    t.later(() => { const r = body.querySelector(".bus-row"); r.style.borderColor = "#4B5BD6"; r.style.boxShadow = "0 0 0 3px rgba(75,91,214,.15)"; }, 1000);
+    t.later(() => { sc.style.opacity = 1; sheet.style.transform = "none"; }, 1900);
+    t.later(() => { const ap = a.querySelector(".upi-app"); ap.style.transform = "scale(.9)"; ap.style.transition = "transform .15s"; }, 3000);
+    t.later(() => {
+      sc.style.opacity = 0; sheet.style.transform = "translateY(105%)";
+      body.innerHTML = `<div style="padding:46px 16px;text-align:center">${tickIcon()}<b style="display:block;margin-top:12px;font-size:13px">Booking confirmed</b>
+        <div class="ui-sub" style="margin-top:3px">Seat 14U, Bengaluru to Hyderabad</div>
+        <div class="ui-btn" style="margin-top:22px">Download ticket</div></div>`;
+    }, 3500);
+    t.later(() => { toast.style.opacity = 1; toast.style.transform = "none"; }, 4700);
+    t.later(() => demos.bus(a, t), 7800);
+  };
+
+  /* ---------- Business: merchant home ---------- */
+  demos.merchant = (a, t) => {
+    const names = ["Ravi K.", "Anita S.", "Imran M.", "Divya R.", "Karthik P.", "Neha G."];
+    const amts = [120, 45, 380, 60, 999, 210];
+    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:#F7F8FA;position:relative">
+      <div style="background:linear-gradient(160deg,#1E6E60,#2E9C8A);color:#fff;padding-bottom:16px">
+        ${sb(true)}
+        <div class="pad row" style="justify-content:space-between;padding-top:4px">
+          <div><div style="font-size:10px;opacity:.8">Sri Lakshmi Stores</div><b style="font:700 13px var(--body)">Today's collection</b></div>
+          <button class="snd" aria-pressed="true" style="border:0;background:rgba(255,255,255,.18);color:#fff;border-radius:999px;padding:5px 9px;font:600 9.5px var(--body);cursor:pointer">🔔 Sound on</button>
+        </div>
+        <div class="pad" style="margin-top:8px"><b class="tot" style="font:800 28px var(--display)">₹4,580</b>
+          <div style="font-size:10px;opacity:.85" class="cnt">32 payments</div></div>
+        <div class="pad row" style="gap:8px;margin-top:12px">
+          <span style="flex:1;background:rgba(255,255,255,.18);border-radius:10px;padding:8px;text-align:center;font-weight:600;font-size:10.5px">Show QR</span>
+          <span style="flex:1;background:rgba(255,255,255,.18);border-radius:10px;padding:8px;text-align:center;font-weight:600;font-size:10.5px">Settlements</span>
+        </div>
+      </div>
+      <div class="pad row" style="justify-content:space-between;padding-top:12px;padding-bottom:4px">
+        <b style="font-size:12px">Transactions</b>
+        <span style="font-size:10px;color:var(--ink-2);background:#fff;border:1px solid #E6EAF0;border-radius:8px;padding:4px 8px">Filter</span>
+      </div>
+      <div class="txl pad" style="flex:1;overflow:hidden"></div>
+      <div class="ping" style="position:absolute;left:12px;right:12px;top:48px;z-index:9;background:#fff;border-radius:14px;padding:10px 12px;display:flex;gap:10px;align-items:center;
+           box-shadow:0 12px 28px -10px rgba(26,34,56,.45);transform:translateY(-140%);transition:transform .35s cubic-bezier(.2,.8,.2,1)">
+        <span class="circle" style="width:28px;height:28px;background:#D7F2EA;display:grid;place-items:center;color:#1E6E60;font-weight:700">₹</span>
+        <div style="flex:1"><b class="ping-t" style="font-size:11px"></b><div class="ui-sub">Received just now</div></div>
+      </div>
+    </div>`;
+    const list = a.querySelector(".txl");
+    const row = (n, amt, fresh) => `<div class="row tx" style="padding:10px 0;border-bottom:1px solid #EEF1F5;${fresh ? "background:var(--change-soft);margin:0 -14px;padding-left:14px;padding-right:14px;transition:background 1.5s" : ""}">
+      <span class="circle" style="width:30px;height:30px;background:#E3E7ED;display:grid;place-items:center;font-size:10px;font-weight:700;color:var(--ink-2)">${n[0]}</span>
+      <div class="col" style="flex:1;gap:2px"><b style="font-size:11px">${n}</b><span class="ui-sub">UPI, ${fresh ? "just now" : "earlier today"}</span></div>
+      <b style="font-size:12px;color:#1E6E60">+₹${amt}</b></div>`;
+    list.innerHTML = [0, 1, 2, 3, 4].map(i => row(names[(i + 2) % 6], amts[(i + 3) % 6], false)).join("");
+    const btn = a.querySelector(".snd");
+    btn.addEventListener("click", () => {
+      const on = btn.getAttribute("aria-pressed") !== "true";
+      btn.setAttribute("aria-pressed", on); btn.textContent = on ? "🔔 Sound on" : "🔕 Sound off";
+    });
+    if (reduced) return;
+    let total = 4580, count = 32, k = 0;
+    const tot = a.querySelector(".tot"), cnt = a.querySelector(".cnt"), ping = a.querySelector(".ping"), pt = a.querySelector(".ping-t");
+    const arrive = () => {
+      const n = names[k % 6], amt = amts[k % 6]; k++;
+      pt.textContent = `₹${amt} from ${n}`;
+      ping.style.transform = "none";
+      t.later(() => { ping.style.transform = "translateY(-140%)"; }, 1600);
+      list.insertAdjacentHTML("afterbegin", row(n, amt, true));
+      const fresh = list.firstElementChild;
+      t.later(() => { fresh.style.background = "transparent"; }, 900);
+      while (list.children.length > 7) list.lastElementChild.remove();
+      total += amt; count++;
+      tot.textContent = "₹" + total.toLocaleString("en-IN"); cnt.textContent = `${count} payments`;
+    };
+    t.later(arrive, 900);
+    t.every(arrive, 3200);
+  };
+
+  /* ---------- TVMAX ---------- */
+  demos.tvmax = (a, t) => {
+    const packs = [["Base Pack", "120 channels", 199, true], ["Sports Plus", "18 channels", 89, false], ["Kids", "12 channels", 49, false], ["Regional", "40 channels", 69, false]];
+    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:#12162A;color:#fff;position:relative">
+      ${sb(true)}
+      <div class="tv-body" style="flex:1;position:relative;overflow:hidden"></div>
+      ${scrim}${upiSheet("Pay ₹337 with")}
+    </div>`;
+    const body = a.querySelector(".tv-body");
+    const sheet = a.querySelector(".upi"), sc = a.querySelector(".scrim");
+    const sel = new Set([0]);
+    const totalOf = () => [...sel].reduce((s, i) => s + packs[i][2], 0);
+    const plansView = () => {
+      body.innerHTML = `
+        <div class="pad" style="padding-top:4px"><b style="font:700 15px var(--display)">Manage plans</b>
+          <div class="row" style="gap:6px;margin:10px 0 4px">
+            ${["Packs", "Channels", "Add-ons"].map((x, i) => `<span style="font-size:10px;font-weight:600;padding:5px 10px;border-radius:999px;background:${i ? "rgba(255,255,255,.08)" : "#E9A400"};color:${i ? "#C9CFE0" : "#1A2238"}">${x}</span>`).join("")}
+          </div>
+          <div class="packs"></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 14px 20px;background:#1A2038;border-top:1px solid rgba(255,255,255,.08)" class="row">
+          <div style="flex:1"><div style="font-size:9.5px;color:#9AA4BC">Monthly total</div><b class="tv-tot" style="font:700 16px var(--display)">₹${totalOf()}</b></div>
+          <span class="tv-pay" style="background:#E9A400;color:#1A2238;border-radius:10px;padding:9px 16px;font-weight:700;font-size:11px">Checkout</span>
+        </div>`;
+      const host = body.querySelector(".packs");
+      host.innerHTML = packs.map((p, i) => `
+        <div class="pack" data-i="${i}" style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid ${sel.has(i) ? "#E9A400" : "rgba(255,255,255,.08)"};border-radius:12px;padding:10px;margin-top:8px;transition:border-color .2s">
+          <span style="width:34px;height:34px;border-radius:9px;background:${["#4B5BD6", "#2E9C8A", "#C9637A", "#8A93A6"][i]}"></span>
+          <div style="flex:1"><b style="font-size:11.5px">${p[0]}</b>${p[3] ? `<span style="font-size:8.5px;margin-left:6px;color:#E9A400">Required</span>` : ""}<div style="font-size:9.5px;color:#9AA4BC">${p[1]}</div></div>
+          <b style="font-size:11.5px">₹${p[2]}</b>
+          <span class="chk" style="width:16px;height:16px;border-radius:5px;border:1.5px solid ${sel.has(i) ? "#E9A400" : "#5B6478"};background:${sel.has(i) ? "#E9A400" : "transparent"}"></span>
+        </div>`).join("");
+    };
+    const toggle = (i) => {
+      if (packs[i][3]) return;
+      sel.has(i) ? sel.delete(i) : sel.add(i);
+      const el = body.querySelector(`.pack[data-i="${i}"]`), c = el.querySelector(".chk");
+      el.style.borderColor = sel.has(i) ? "#E9A400" : "rgba(255,255,255,.08)";
+      c.style.borderColor = sel.has(i) ? "#E9A400" : "#5B6478"; c.style.background = sel.has(i) ? "#E9A400" : "transparent";
+      body.querySelector(".tv-tot").textContent = "₹" + totalOf();
+    };
+    plansView();
+    body.addEventListener("click", e => { const p = e.target.closest(".pack"); if (p) toggle(+p.dataset.i); });
+    if (reduced) return;
+    t.later(() => toggle(1), 1100);
+    t.later(() => toggle(3), 1900);
+    t.later(() => {
+      body.innerHTML = `<div class="pad" style="padding-top:4px"><b style="font:700 15px var(--display)">Checkout</b>
+        <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:12px;margin-top:12px">
+          ${[...sel].map(i => `<div class="row" style="justify-content:space-between;padding:5px 0"><span style="color:#C9CFE0">${packs[i][0]}</span><b>₹${packs[i][2]}</b></div>`).join("")}
+          <div class="row" style="justify-content:space-between;padding:8px 0 0;margin-top:6px;border-top:1px dashed rgba(255,255,255,.15)"><span>Total incl. tax</span><b>₹337</b></div>
+        </div>
+        <div style="margin-top:14px;font-size:10px;color:#9AA4BC">Pay with</div>
+        <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:11px 12px;margin-top:6px" class="row"><span style="flex:1">UPI app</span><span style="color:#E9A400">●</span></div>
+        </div>
+        <div style="position:absolute;left:14px;right:14px;bottom:20px;background:#E9A400;color:#1A2238;border-radius:12px;padding:11px;text-align:center;font-weight:700">Pay ₹337</div>`;
+    }, 2900);
+    t.later(() => { sc.style.opacity = 1; sheet.style.transform = "none"; }, 3900);
+    t.later(() => { const ap = a.querySelectorAll(".upi-app")[1]; ap.style.transition = "transform .15s"; ap.style.transform = "scale(.9)"; }, 4800);
+    t.later(() => {
+      sc.style.opacity = 0; sheet.style.transform = "translateY(105%)";
+      body.innerHTML = `<div style="text-align:center;padding-top:90px">
+        <span class="spin" style="display:inline-block;width:40px;height:40px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:#E9A400"></span>
+        <b style="display:block;margin-top:14px">Confirming your payment</b>
+        <div style="font-size:10px;color:#9AA4BC;margin-top:4px">Checking with your bank</div></div>`;
+    }, 5300);
+    t.later(() => {
+      body.innerHTML = `<div style="text-align:center;padding-top:80px">${tickIcon("#2E9C8A", 56)}
+        <b style="display:block;margin-top:14px;font:700 15px var(--display)">Plan active</b>
+        <div style="font-size:10px;color:#9AA4BC;margin-top:4px">Base Pack, Sports Plus and Regional on your set-top box</div></div>`;
+    }, 6900);
+    t.later(() => demos.tvmax(a, t), 9800);
+  };
+
+  /* ---------- Vine Gypsy ---------- */
+  demos.vine = (a) => {
+    const rooms = [
+      ["Hillcrest Cellars", "Napa Valley", 4.8, "$$", ["Food", "Great service"]],
+      ["Old Vine Estate", "Barossa", 4.6, "$", ["Great wine"]],
+      ["Maison Ardoise", "Burgundy", 4.9, "$$$", ["Great wine", "Food"]],
+      ["Riverbend Tasting Room", "Willamette", 4.4, "$", ["Great service"]],
+      ["Casa Alta", "Mendoza", 4.7, "$$", ["Food", "Great wine"]]
+    ];
+    const filters = ["Great wine", "Food", "Great service", "$"];
+    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:#FBF8F5">
+      ${sb()}
+      <div class="pad" style="padding-top:4px"><b style="font:700 16px var(--display);color:#5A1E33">Tasting rooms</b>
+        <div class="searchbar" style="margin-top:10px">Search a region or winery</div>
+        <div class="vf row" style="gap:6px;margin:10px 0 2px;flex-wrap:wrap">
+          ${filters.map(f => `<button data-f="${f}" aria-pressed="false" style="border:1px solid #E5D6DC;background:#fff;color:#5A1E33;border-radius:999px;padding:5px 10px;font:600 10px var(--body);cursor:pointer">${f}</button>`).join("")}
+        </div>
+      </div>
+      <div class="vl pad" style="flex:1;overflow-y:auto;scrollbar-width:none;padding-bottom:14px"></div>
+    </div>`;
+    const active = new Set();
+    const list = a.querySelector(".vl");
+    const render = () => {
+      const hits = rooms.filter(r => [...active].every(f => f === "$" ? r[3] === "$" : r[4].includes(f)));
+      list.innerHTML = hits.length ? hits.map(r => `
+        <div style="background:#fff;border-radius:14px;margin-top:10px;overflow:hidden;border:1px solid #F0E6EA">
+          <div style="height:54px;background:linear-gradient(120deg,#7A2E48,#B8577A)"></div>
+          <div style="padding:9px 11px">
+            <div class="row" style="justify-content:space-between"><b style="font-size:11.5px">${r[0]}</b><b style="font-size:11px;color:#7A2E48">★ ${r[2]}</b></div>
+            <div class="ui-sub">${r[1]}, ${r[3]}</div>
+            <div class="row" style="gap:4px;margin-top:6px">${r[4].map(x => `<span style="font-size:8.5px;background:#F7EEF1;color:#7A2E48;border-radius:6px;padding:2px 6px">${x}</span>`).join("")}</div>
+          </div>
+        </div>`).join("") : `<div style="text-align:center;padding:30px 0" class="ui-sub">No rooms match all filters. Remove one to see more.</div>`;
+    };
+    a.querySelectorAll(".vf button").forEach(btn => btn.addEventListener("click", () => {
+      const f = btn.dataset.f; active.has(f) ? active.delete(f) : active.add(f);
+      const on = active.has(f);
+      btn.setAttribute("aria-pressed", on);
+      btn.style.background = on ? "#7A2E48" : "#fff"; btn.style.color = on ? "#fff" : "#5A1E33";
+      render();
+    }));
+    render();
+  };
+
+  /* ---------- Vine Gypsy: shared bits ---------- */
+  const WINE = "#7A2E48", WINE_D = "#5A1E33", WINE_L = "#F7EEF1";
+  const vineHead = (title, back = true) => `${sb()}<div class="row pad" style="padding-bottom:10px">
+      ${back ? `<span style="font-size:16px;color:${WINE_D}">‹</span>` : ""}<b style="font:700 15px var(--display);color:${WINE_D}">${title}</b></div>`;
+  const stars = (n, size = 15) => `<span class="row" style="gap:2px">${[1, 2, 3, 4, 5].map(i => `<span class="st" data-v="${i}" style="font-size:${size}px;color:${i <= n ? "#D9A21B" : "#E5D6DC"};transition:color .2s">★</span>`).join("")}</span>`;
+
+  /* ---------- Vine Gypsy: guided review ---------- */
+  demos.vineReview = (a, t) => {
+    const qs = ["Wine quality", "Value for price", "Food offering", "Service"];
+    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:#FBF8F5;position:relative">
+      ${vineHead("Review Hillcrest Cellars")}
+      <div class="pad">
+        <div class="row" style="gap:4px">${[0, 1, 2].map(i => `<span class="stp" style="flex:1;height:5px;border-radius:3px;background:${i ? "#EADCE1" : WINE};transition:background .3s"></span>`).join("")}</div>
+        <div class="ui-sub" style="margin-top:6px">About the tasting room</div>
+      </div>
+      <div class="rv pad" style="flex:1;padding-top:6px">
+        ${qs.map((q, i) => `<div class="q" style="background:#fff;border:1px solid #F0E6EA;border-radius:12px;padding:10px 12px;margin-top:8px">
+          <div style="font-weight:600;font-size:11px;margin-bottom:6px">${q}</div>${stars(0, 17)}</div>`).join("")}
+      </div>
+      <div class="pad" style="padding-bottom:22px"><div class="vbtn" style="background:${WINE};color:#fff;border-radius:12px;text-align:center;padding:11px;font-weight:600">Next</div></div>
+      <div class="done" style="position:absolute;inset:0;background:#FBF8F5;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;padding:24px;text-align:center">
+        ${tickIcon(WINE, 56)}<b style="margin-top:14px;font:700 15px var(--display);color:${WINE_D}">Thanks for your review</b>
+        <div class="ui-sub" style="margin-top:4px">Your followers will be notified</div>
+      </div>
+    </div>`;
+    const qEls = a.querySelectorAll(".q"), steps = a.querySelectorAll(".stp");
+    const rate = (qi, v) => qEls[qi].querySelectorAll(".st").forEach((s, k) => s.style.color = k < v ? "#D9A21B" : "#E5D6DC");
+    qEls.forEach((q, qi) => q.querySelectorAll(".st").forEach(s => { s.style.cursor = "pointer"; s.addEventListener("click", () => rate(qi, +s.dataset.v)); }));
+    if (reduced) { [5, 4, 3, 5].forEach((v, i) => rate(i, v)); return; }
+    [5, 4, 3, 5].forEach((v, i) => t.later(() => rate(i, v), 900 + i * 700));
+    t.later(() => {
+      steps[1].style.background = WINE;
+      a.querySelector(".ui-sub").textContent = "Photos and comment";
+      a.querySelector(".rv").innerHTML = `
+        <div class="row" style="gap:8px;margin-top:8px">
+          ${["#B8577A", "#7A2E48", "#D9A21B"].map(c => `<span style="width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,${c},#F0E6EA)"></span>`).join("")}
+          <span style="width:64px;height:64px;border-radius:12px;border:1.5px dashed #D8C3CB;display:grid;place-items:center;color:${WINE};font-size:20px">+</span>
+        </div>
+        <div class="ui-sub" style="margin-top:6px">Compressed on your phone before upload</div>
+        <div class="cm" style="background:#fff;border:1px solid #F0E6EA;border-radius:12px;padding:10px 12px;margin-top:12px;min-height:80px;font-size:11px;line-height:1.5"></div>`;
+      const cm = a.querySelector(".cm"), txt = "Lovely Cabernet flight and a shaded patio. Book ahead on weekends.";
+      let k = 0; t.every(() => { if (k <= txt.length) cm.textContent = txt.slice(0, k++); }, 35);
+    }, 4000);
+    t.later(() => { steps[2].style.background = WINE; a.querySelector(".vbtn").textContent = "Submit review"; }, 6800);
+    t.later(() => { const d = a.querySelector(".done"); d.style.opacity = 1; }, 7600);
+    t.later(() => demos.vineReview(a, t), 10200);
+  };
+
+  /* ---------- Vine Gypsy: community ---------- */
+  demos.vineCommunity = (a, t) => {
+    const ppl = [["Sofia Marchetti", "Certified sommelier", 142], ["James Okafor", "Wine educator", 97], ["Lena Brandt", "Enthusiast", 64], ["Arjun Mehta", "Enthusiast", 51]];
+    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:#FBF8F5;position:relative">
+      ${vineHead("Top reviewers", false)}
+      <div class="pad" style="flex:1">
+        ${ppl.map((p, i) => `<div class="row" style="background:#fff;border:1px solid #F0E6EA;border-radius:12px;padding:9px 10px;margin-top:8px">
+          <span class="circle" style="width:32px;height:32px;background:${["#B8577A", "#7A2E48", "#D9A21B", "#8A93A6"][i]};flex:none"></span>
+          <div style="flex:1;min-width:0"><b style="font-size:11px">${p[0]}</b>${i < 2 ? `<span title="Certified" style="color:${WINE};margin-left:4px">✓</span>` : ""}
+            <div class="ui-sub">${p[1]}, ${p[2]} reviews</div></div>
+          <button class="fl" data-on="${i === 0}" style="border:1px solid ${WINE};border-radius:999px;padding:4px 10px;font:600 9.5px var(--body);cursor:pointer;
+            background:${i === 0 ? WINE : "#fff"};color:${i === 0 ? "#fff" : WINE}">${i === 0 ? "Following" : "Follow"}</button>
+        </div>`).join("")}
+      </div>
+      <div class="notes" style="position:absolute;left:10px;right:10px;top:46px;z-index:5;display:flex;flex-direction:column;gap:6px"></div>
+    </div>`;
+    a.querySelectorAll(".fl").forEach(b => b.addEventListener("click", () => {
+      const on = b.dataset.on !== "true"; b.dataset.on = on;
+      b.textContent = on ? "Following" : "Follow"; b.style.background = on ? WINE : "#fff"; b.style.color = on ? "#fff" : WINE;
+    }));
+    if (reduced) return;
+    const box = a.querySelector(".notes");
+    const msgs = [
+      ["Sofia Marchetti reviewed Maison Ardoise", "★ 4.9, \"Exceptional Chardonnay\""],
+      ["James Okafor started following you", "Tap to see his profile"],
+      ["Sofia Marchetti visited Casa Alta", "Mendoza, Argentina"]
+    ];
+    msgs.forEach((m, i) => t.later(() => {
+      const el = document.createElement("div");
+      el.style.cssText = "background:#fff;border-radius:14px;padding:9px 11px;display:flex;gap:9px;align-items:center;box-shadow:0 10px 24px -10px rgba(26,34,56,.45);opacity:0;transform:translateY(-12px);transition:all .35s cubic-bezier(.2,.8,.2,1)";
+      el.innerHTML = `<span style="width:22px;height:22px;border-radius:6px;background:${WINE};flex:none"></span>
+        <div style="min-width:0"><b style="font-size:10.5px;display:block">${m[0]}</b><span class="ui-sub" style="font-size:9.5px">${m[1]}</span></div>`;
+      box.prepend(el);
+      requestAnimationFrame(() => { el.style.opacity = 1; el.style.transform = "none"; });
+      t.later(() => { el.style.opacity = 0; el.style.transform = "translateY(-12px)"; t.later(() => el.remove(), 360); }, 2600);
+    }, 900 + i * 2400));
+    t.later(() => demos.vineCommunity(a, t), 9000);
+  };
+
+  /* ---------- Vine Gypsy: tasting-room page for owners ---------- */
+  demos.vineRoom = (a) => {
+    const tabs = {
+      Wines: [["2021 Estate Cabernet", "Red, $42"], ["2022 Reserve Chardonnay", "White, $36"], ["Sparkling Rosé", "Sparkling, $30"]],
+      Events: [["Harvest weekend", "Sat 14 Sep, 11am"], ["Blending workshop", "Thu 26 Sep, 5pm"], ["Live jazz on the patio", "Fri 4 Oct, 6pm"]],
+      Hours: [["Mon to Thu", "11am to 5pm"], ["Fri and Sat", "10am to 7pm"], ["Sunday", "Closed"]]
+    };
+    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:#FBF8F5">
+      <div style="height:150px;background:linear-gradient(140deg,${WINE_D},#B8577A);position:relative;color:#fff">
+        ${sb(true)}
+        <div style="position:absolute;left:14px;bottom:12px"><b style="font:700 16px var(--display)">Hillcrest Cellars</b><div style="font-size:10px;opacity:.85">Napa Valley, ★ 4.8</div></div>
+        <span style="position:absolute;right:12px;bottom:14px;font-size:9.5px;font-weight:600;background:#D7F2EA;color:#1E6E60;border-radius:999px;padding:3px 8px">Claimed by you</span>
+      </div>
+      <div class="pad row vt" role="tablist" style="gap:6px;padding-top:12px">
+        ${Object.keys(tabs).map((k, i) => `<button role="tab" data-k="${k}" aria-selected="${!i}" style="border:0;border-radius:999px;padding:6px 12px;font:600 10.5px var(--body);cursor:pointer;
+          background:${i ? WINE_L : WINE};color:${i ? WINE : "#fff"}">${k}</button>`).join("")}
+      </div>
+      <div class="vlist pad" style="flex:1;padding-top:4px"></div>
+      <div class="pad" style="padding-bottom:22px"><div style="border:1.5px dashed #D8C3CB;color:${WINE};border-radius:12px;text-align:center;padding:10px;font-weight:600" class="vadd">Add a wine</div></div>
+    </div>`;
+    const list = a.querySelector(".vlist"), add = a.querySelector(".vadd"), btns = a.querySelectorAll(".vt button");
+    const show = (k) => {
+      btns.forEach(b => { const on = b.dataset.k === k; b.setAttribute("aria-selected", on); b.style.background = on ? WINE : WINE_L; b.style.color = on ? "#fff" : WINE; });
+      list.innerHTML = tabs[k].map(([h, s]) => `<div class="row" style="background:#fff;border:1px solid #F0E6EA;border-radius:12px;padding:10px 12px;margin-top:8px;justify-content:space-between">
+        <div><b style="font-size:11px">${h}</b><div class="ui-sub">${s}</div></div><span style="color:${WINE};font-size:10px;font-weight:600">Edit</span></div>`).join("");
+      add.textContent = k === "Wines" ? "Add a wine" : k === "Events" ? "Add an event" : "Edit opening hours";
+    };
+    btns.forEach(b => b.addEventListener("click", () => show(b.dataset.k)));
+    show("Wines");
+  };
+
+  /* ================= explorer component ================= */
+  class Explorer {
+    constructor(root, project) {
+      this.root = root; this.p = project; this.i = 0; this.compare = false;
+      this.timers = [];
+      this.t = {
+        later: (fn, ms) => { const id = setTimeout(fn, ms); this.timers.push(id); return id; },
+        every: (fn, ms) => { const id = setInterval(fn, ms); this.timers.push(id); return id; }
+      };
+      this.build();
+      this.show(0);
+      if ("IntersectionObserver" in window) {
+        let visible = true;
+        new IntersectionObserver(([e]) => {
+          if (e.isIntersecting && !visible) { visible = true; this.show(this.i); }
+          else if (!e.isIntersecting && visible) { visible = false; this.stop(); }
+        }, { threshold: .05 }).observe(root);
+      }
+    }
+    stop() { this.timers.forEach(id => { clearTimeout(id); clearInterval(id); }); this.timers = []; }
+    build() {
+      const many = this.p.features.length > 1;
+      this.root.innerHTML = `
+        ${many ? `<div class="feat-tabs" role="tablist" aria-label="${esc(this.p.name)} features">
+          ${this.p.features.map((f, k) => `<button role="tab" type="button" data-k="${k}" aria-selected="${k === 0}">${esc(f.short)}</button>`).join("")}
+        </div>` : ""}
+        <div class="feat">
+          <div class="feat-visual">
+            <div class="phones">
+              <figure class="device dev-before" hidden><figcaption><span class="tag tag-before">Before</span></figcaption>
+                <div class="phone"><div class="island"></div><div class="screen sc-before"></div></div></figure>
+              <figure class="device dev-after"><figcaption class="cap-after" hidden><span class="tag tag-after">After</span></figcaption>
+                <div class="phone"><div class="island"></div><div class="screen sc-after"></div></div></figure>
+            </div>
+          </div>
+          <div class="feat-text">
+            <h3 class="feat-title"></h3>
+            <p class="feat-what"></p>
+            <div class="feat-built-wrap">
+              <h4>What I built</h4>
+              <ul class="feat-built"></ul>
+            </div>
+            <div class="feat-actions">
+              <p class="feat-hint"></p>
+              <button type="button" class="ghost cmp" aria-pressed="false">Compare with before</button>
+            </div>
+          </div>
+        </div>`;
+      this.tabs = [...this.root.querySelectorAll(".feat-tabs button")];
+      this.tabs.forEach(b => b.addEventListener("click", () => this.show(+b.dataset.k)));
+      const tl = this.root.querySelector(".feat-tabs");
+      if (tl) tl.addEventListener("keydown", e => {
+        if (!["ArrowLeft", "ArrowRight"].includes(e.key)) return;
+        e.preventDefault();
+        const n = (this.i + (e.key === "ArrowRight" ? 1 : -1) + this.tabs.length) % this.tabs.length;
+        this.show(n); this.tabs[n].focus();
+      });
+      this.cmp = this.root.querySelector(".cmp");
+      this.cmp.addEventListener("click", () => { this.compare = !this.compare; this.show(this.i); });
+    }
+    show(k) {
+      this.stop();
+      this.i = k;
+      const f = this.p.features[k];
+      this.tabs.forEach((b, j) => {
+        b.setAttribute("aria-selected", j === k);
+        b.tabIndex = j === k ? 0 : -1;
+        if (j === k && window.innerWidth < 900) b.scrollIntoView({ block: "nearest", inline: "nearest", behavior: reduced ? "auto" : "smooth" });
+      });
+      const r = this.root;
+      r.querySelector(".feat-title").textContent = f.title;
+      r.querySelector(".feat-what").textContent = f.what;
+      const ul = r.querySelector(".feat-built");
+      ul.innerHTML = f.built.map(x => `<li>${esc(x)}</li>`).join("");
+      r.querySelector(".feat-built-wrap").hidden = !f.built.length;
+      r.querySelector(".feat-hint").textContent = f.hint || "";
+      const hasBefore = !!f.before && !!befores[f.before];
+      if (!hasBefore) this.compare = false;
+      this.cmp.hidden = !hasBefore;
+      this.cmp.setAttribute("aria-pressed", this.compare);
+      this.cmp.textContent = this.compare ? "Hide before" : "Compare with before";
+      r.querySelector(".dev-before").hidden = !this.compare;
+      r.querySelector(".cap-after").hidden = !this.compare;
+      r.querySelector(".feat").classList.toggle("comparing", this.compare);
+      const after = r.querySelector(".sc-after"), before = r.querySelector(".sc-before");
+      after.innerHTML = ""; before.innerHTML = "";
+      demos[f.demo](after, this.t);
+      if (this.compare) befores[f.before](before);
     }
   }
 
-  list.addEventListener("click", e => {
-    const btn = e.target.closest("button");
-    if (btn) show(+btn.dataset.i, true);
-  });
-  list.addEventListener("keydown", e => {
-    if (!["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) return;
-    e.preventDefault();
-    const dir = (e.key === "ArrowDown" || e.key === "ArrowRight") ? 1 : -1;
-    const next = (current + dir + D.cases.length) % D.cases.length;
-    show(next, true);
-    list.querySelectorAll("button")[next].focus();
-  });
-  document.querySelectorAll(".seg button").forEach(btn => btn.addEventListener("click", () => setView(btn.dataset.view)));
-  $("#replay").addEventListener("click", () => show(current));
+  /* ================= render page ================= */
+  $("#project-index").innerHTML = D.projects.map(p => `
+    <li><a href="#p-${p.id}" style="--area-color:${p.color}">
+      <span class="pi-name">${esc(p.name)}</span>
+      <span class="pi-kind">${esc(p.kind)}</span>
+      <span class="pi-meta">${esc(p.company)}, ${esc(p.period)}</span>
+    </a></li>`).join("");
 
-  show(0);
-
-  /* ================= fixes ================= */
-  const fixList = $("#fix-list");
-  D.fixes.forEach(f => {
-    const li = document.createElement("li");
-    li.className = "fix";
-    li.style.setProperty("--area-color", D.areas[f.area]);
-    li.innerHTML = `<details>
-      <summary>
-        <span class="fix-area">${f.area}</span>
-        <span><span class="fix-title">${esc(f.title)}</span><br><span class="fix-toggle">Show the change</span></span>
-        <span class="fix-why">${esc(f.why)}</span>
-        <span class="fix-date">${f.date}<br><code>${f.hash.slice(0, 7)}</code></span>
-      </summary>
-      <div class="code-view">${renderDiff(f.file, f.diff)}</div>
-    </details>`;
-    fixList.appendChild(li);
-  });
-
-  /* ================= timeline ================= */
-  const order = ["Messenger", "Payments", "Home", "Platform", "App-wide"];
-  const chart = $("#chart");
-  const totals = D.months.map(m => order.reduce((s, k) => s + (m[k] || 0), 0));
-  const max = Math.max(...totals);
-  const MN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  D.months.forEach((m, i) => {
-    const [y, mo] = m.m.split("-");
-    const col = document.createElement("div");
-    col.className = "month";
-    const pct = totals[i] / max;
-    col.innerHTML = `
-      ${D.flags[m.m] ? `<span class="note-flag">${D.flags[m.m]}</span>` : ""}
-      <div class="mcount">${totals[i]}</div>
-      <div class="stack" style="height:calc((100% - 90px) * ${pct})" title="${MN[+mo - 1]} ${y}: ${totals[i]} commits">
-        ${order.filter(k => m[k]).map(k => `<span style="flex:${m[k]};background:${D.areas[k]}"></span>`).join("")}
+  const host = $("#projects");
+  D.projects.forEach((p, n) => {
+    const sec = document.createElement("section");
+    sec.className = "project" + (n % 2 ? " alt" : "");
+    sec.id = `p-${p.id}`;
+    sec.style.setProperty("--area-color", p.color);
+    sec.setAttribute("aria-labelledby", `t-${p.id}`);
+    sec.innerHTML = `
+      <div class="p-head">
+        <div>
+          <p class="p-kind">${esc(p.kind)}</p>
+          <h2 id="t-${p.id}" class="p-name">${esc(p.name)}</h2>
+          <p class="p-meta">${esc(p.company)}, ${esc(p.period)}</p>
+        </div>
+        <div>
+          <p class="p-summary">${esc(p.summary)}</p>
+          <ul class="chips" aria-label="Tools">${p.stack.map(s => `<li>${esc(s)}</li>`).join("")}</ul>
+        </div>
       </div>
-      <div class="mlabel">${MN[+mo - 1]}${(i === 0 || mo === "01") ? `<br>${y}` : ""}</div>`;
-    chart.appendChild(col);
+      <div class="explorer"></div>
+      ${p.underTheHood ? `
+        <div class="uth">
+          <h3>${esc(p.underTheHood.title)}</h3>
+          <ul>${p.underTheHood.items.map(([h, d]) => `<li><b>${esc(h)}</b><span>${esc(d)}</span></li>`).join("")}</ul>
+        </div>` : ""}`;
+    host.appendChild(sec);
+    new Explorer(sec.querySelector(".explorer"), p);
   });
-  chart.setAttribute("aria-label", `Commits per month from June 2025 to November 2026, peaking at ${max} in August 2026.`);
-  $("#legend").innerHTML = order.map(k => {
-    const n = D.months.reduce((s, m) => s + (m[k] || 0), 0);
-    return `<li><i style="background:${D.areas[k]}"></i>${k} <span style="color:var(--muted)">${n}</span></li>`;
-  }).join("");
 
-  /* pause animations when the bench is off-screen */
-  if ("IntersectionObserver" in window) {
-    let visible = true;
-    new IntersectionObserver(([e]) => {
-      if (e.isIntersecting && !visible) { visible = true; show(current); }
-      else if (!e.isIntersecting && visible) { visible = false; resetTimers(); }
-    }).observe($("#bench-stage"));
-  }
+  $("#jobs").innerHTML = D.jobs.map(j => `
+    <li>
+      <span class="j-period">${esc(j.period)}</span>
+      <div><h3>${esc(j.role)}, ${esc(j.company)}</h3><p>${esc(j.text)}</p></div>
+    </li>`).join("");
+  $("#skills").innerHTML = `<h3>Tools I use</h3><dl>${D.skills.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>`;
+  $("#contact-links").innerHTML = D.contact.map(c => `<a href="${esc(c.href)}">${esc(c.label)}</a>`).join("<br>");
 })();

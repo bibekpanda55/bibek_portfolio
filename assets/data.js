@@ -1,444 +1,280 @@
-/* Content for the portfolio. Commit facts come from innopay-user-app-fl's git history. */
+/* All page content lives here. Edit text freely; app.js renders it. */
 window.PORTFOLIO = {
-  stats: { total: 199, files: 803, first: "2025-06-03", last: "2026-11-04" },
+  contact: [
+    { label: "github.com/bibekpanda55", href: "https://github.com/bibekpanda55" }
+  ],
 
-  areas: {
-    Messenger: "var(--area-messenger)",
-    Payments: "var(--area-payments)",
-    Home: "var(--area-home)",
-    Platform: "var(--area-platform)",
-    "App-wide": "var(--area-app)"
-  },
+  projects: [
+    {
+      id: "innopay",
+      name: "Innopay",
+      kind: "Consumer payments app",
+      company: "Innopay",
+      period: "2025 to now",
+      color: "var(--area-messenger)",
+      summary: "Innopay is a payments app for India: bills, mobile recharges, bus tickets and digital gold, paid by UPI. I joined in 2025 and have built its Messenger, a large part of the home screen and much of the payment flow.",
+      stack: ["Flutter", "GetX", "WebSockets", "SQLite", "Firebase", "Kotlin & Swift channels"],
+      features: [
+        {
+          id: "messenger",
+          title: "Messenger, built from the first screen",
+          short: "Messenger",
+          what: "Chat with any Innopay contact without leaving the payments app. I designed and wrote most of it, around 110 files, and it now ships to every user.",
+          built: [
+            "Real-time chat over WebSockets with sent, delivered and read ticks, sent to the server in batches",
+            "Works offline: messages queue up and send when you reconnect, from a local SQLite store I migrated off Hive",
+            "Contact sync runs off the main thread, de-duplicates numbers and finds who's on Innopay",
+            "Swipe to reply, copy, delete for everyone, block, clear chat and contact-permission flows",
+            "Status updates with view counts, promotional messages, and notifications that open the right chat"
+          ],
+          demo: "messenger",
+          hint: "The phone plays a swipe-to-reply."
+        },
+        {
+          id: "billshare",
+          title: "Pay a bill a friend sends you",
+          short: "Bills in chat",
+          what: "Share an electricity or phone bill into a chat and the other person can pay it from the message itself.",
+          built: [
+            "Bill cards in chat with a live Pay now button and a preview of the bill in the input bar",
+            "Before paying, the app re-checks the message so an edited or deleted bill can't be paid by mistake",
+            "Payment runs in the normal Innopay flow, then the card updates to show it's paid",
+            "Messenger terms are checked before a first share, and people not yet on Messenger get an invite"
+          ],
+          demo: "billshare",
+          hint: "Tap Pay now in the chat."
+        },
+        {
+          id: "home",
+          title: "A home screen the business can redesign",
+          short: "Server-driven home",
+          what: "The home screen's layout comes from the server, so campaigns and new services go live without an app release.",
+          built: [
+            "A full-bleed carousel header: backgrounds cross-fade, artwork slides, each slide waits for its animation",
+            "A search bar and profile header that float above the page and pick up a background as you scroll",
+            "Staggered rows, uniform grids, configurable service tags and per-banner loading images",
+            "Banner assets prefetched at launch, and the page refreshes after every payment"
+          ],
+          demo: "carousel",
+          before: "carousel",
+          hint: "The header changes slides on its own."
+        },
+        {
+          id: "plans",
+          title: "Finding the right recharge plan",
+          short: "Recharge plans",
+          what: "Prepaid plans in a sheet you can search by price, data or validity, instead of one long list.",
+          built: [
+            "A draggable sheet that snaps between 40% and full height based on how fast you swipe",
+            "Search across all plans, with swipeable category tabs",
+            "When nothing matches, the closest plans are suggested instead of an empty screen",
+            "Redesigned plan cards with validity and data at a glance"
+          ],
+          demo: "plans",
+          before: "plans",
+          hint: "Type in the search bar. Try 299, 2GB, or a price with no plan."
+        },
+        {
+          id: "receipt",
+          title: "A payment receipt that leads somewhere",
+          short: "Payment receipt",
+          what: "After paying, people see what they paid and a natural next step, instead of a dead end.",
+          built: [
+            "Rebuilt the confirmation screen with the receipt, top services and a Popular badge",
+            "A rotating offer strip where only the text slides and the icon and dots stay put",
+            "Ad and referral slots driven by configuration",
+            "First-payment and payment-initiated analytics events"
+          ],
+          demo: "receipt",
+          before: "receipt",
+          hint: "Watch the offer strip."
+        },
+        {
+          id: "bus",
+          title: "Bus tickets without leaving the app",
+          short: "Bus tickets",
+          what: "Bus booking is a partner web flow. I built the native shell around it so it feels like part of Innopay.",
+          built: [
+            "Single sign-on into the booking site, refreshed if a link reopens the screen",
+            "Hands UPI payments to the user's UPI app and closes the gateway when it returns",
+            "Downloads tickets as PDFs named from the server, and opens phone, mail and map links outside",
+            "Recovers from load errors and from iOS killing the web process in the background"
+          ],
+          demo: "bus",
+          hint: "The phone books and pays for a ticket."
+        }
+      ],
+      underTheHood: {
+        title: "Also on Innopay",
+        items: [
+          ["Android 16 ready", "Edge-to-edge layouts and system insets everywhere for target SDK 36."],
+          ["iOS on Swift Package Manager", "Moved native dependencies off CocoaPods."],
+          ["In-app updates", "Prompts that check the platform and preload their animation."],
+          ["Device security", "Root and jailbreak checks at launch and on resume."],
+          ["Deep links", "Cold-start routing and iOS universal links that land on the right screen."],
+          ["Steadier taps and networks", "A double-tap guard and a no-internet sheet that dismisses itself when you're back online."]
+        ]
+      }
+    },
 
-  cases: [
     {
-      id: "carousel",
-      area: "Home",
-      title: "A home header that moves",
-      date: "17 Aug 2026",
-      hash: "448811fe7",
-      stat: "6 files, +606 −21",
-      before: "The home header was one static image. Marketing could change the picture, but not run a campaign of several slides, and the categories sheet sat flat underneath it.",
-      after: "A new imageCarousel header type: backgrounds cross-fade in place while the foreground art slides, auto-scroll waits for each slide's Lottie to finish, and the categories sheet lifts 50px to overlap the header's edge. All of it is driven by the backend.",
-      hint: "The After screen runs on its own. Each slide waits for its animation, then cross-fades.",
-      replay: true,
-      code: {
-        file: "lib/ui/screens/landing/home/widgets/image_carousel_banner_widget.dart",
-        diff: `@@ new file, 550 lines @@
-+  /// Backgrounds sit in place and cross-fade as the swipe progresses.
-+  Widget _backgroundCrossFade() {
-+    return AnimatedBuilder(
-+      animation: _pageController,
-+      builder: (context, _) {
-+        final fromPage = _currentPage.floor();
-+        final t = (_currentPage - fromPage).clamp(0.0, 1.0).toDouble();
-+        return Stack(
-+          fit: StackFit.expand,
-+          children: [
-+            if (t < 1) _background(fromPage, opacity: 1 - t),
-+            if (t > 0) _background(fromPage + 1, opacity: t),
-+          ],
-+        );
-+      },
-+    );
-+  }
-@@ innopay_home_screen.dart @@
--  decoration: const BoxDecoration(
--    color: Color(0xffFAFAFA),
-+  // Pulls the categories sheet up so it overlaps the header's bottom edge.
-+  transform: Matrix4.translationValues(0, isImageCarousel ? -50 : 0, 0),
-+  decoration: BoxDecoration(
-+    color: isImageCarousel ? Colors.transparent : Colors.white,
-@@ home_screen_utils.dart @@
--enum HeaderType { image, background, banner, defaultType }
-+enum HeaderType { image, background, banner, imageCarousel, defaultType }`
-      }
+      id: "business",
+      name: "Innopay Business",
+      kind: "Merchant app",
+      company: "Innopay",
+      period: "2025",
+      color: "var(--area-home)",
+      summary: "The app shopkeepers use to accept Innopay payments and track their money. In 2025 I rebuilt most of its merchant-facing screens and the plumbing behind them.",
+      stack: ["Flutter", "Riverpod", "WebSockets", "Isolates", "Firebase Messaging"],
+      features: [
+        {
+          id: "merchant",
+          title: "Payments land on screen as they happen",
+          short: "Live payments",
+          what: "A merchant sees each payment the moment it arrives, alongside settlements and a QR code to show customers.",
+          built: [
+            "Live transactions over WebSockets on top of a local cache, so the list loads instantly",
+            "Large histories decoded in a background isolate so scrolling stays smooth",
+            "Transaction and settlement views with filters, sorting and a custom date picker",
+            "Shop QR codes you can share, download, or create for a fixed amount",
+            "Phone and OTP login with SMS autofill, a resend timer and session-expiry handling",
+            "Background notifications on Android and iOS through native channels, with a sound toggle",
+            "Moved the app's state management from GetX to Riverpod"
+          ],
+          demo: "merchant",
+          hint: "A payment arrives every few seconds."
+        }
+      ]
     },
+
     {
-      id: "sticky",
-      area: "Home",
-      title: "Search that stays in reach",
-      date: "12 Feb 2026",
-      hash: "fc1a4abe6",
-      stat: "25 files, +572 −453",
-      before: "The search bar and profile icon scrolled away with the header, so finding a biller meant scrolling all the way back to the top.",
-      after: "The search bar and profile header now float above the page. They start transparent over the banner, then pick up a white background and soft shadow at the exact point the header slides beneath them.",
-      hint: "Scroll inside both phones to compare.",
-      replay: false,
-      code: {
-        file: "lib/ui/screens/landing/home/innopay_home_screen.dart",
-        diff: `@@ -560,12 +571,34 @@
-+  // Sticky header height = SafeArea top + vertical padding (10+10) + card height (48)
-+  double get _stickyHeaderHeight => MediaQuery.of(context).padding.top + 68;
-+
-+    // Subtract sticky header height so shadow appears when header goes behind sticky bar
-+    return (imageHeight - _stickyHeaderHeight).clamp(0.0, double.infinity);
-@@
-+  // Sticky Header with background on scroll
-+  ValueListenableBuilder<double>(
-+    valueListenable: _scrollOffset,
-+    builder: (context, scrollOffset, child) {
-+      final isScrolled = scrollOffset > _headerCollapseThreshold;
-+      return AnimatedContainer(
-+        duration: const Duration(milliseconds: 200),
-+        decoration: BoxDecoration(
-+          color: isScrolled ? Colors.white : Colors.transparent,
-+          boxShadow: isScrolled
-+              ? [BoxShadow(color: Colors.black.withOpacity(0.1),
-+                  blurRadius: 10, offset: const Offset(0, 2))]
-+              : [],
-+        ),
--        SafeArea(
-+        child: SafeArea(
-+          bottom: false,`
-      }
+      id: "tvmax",
+      name: "TVMAX",
+      kind: "IPTV subscriber app",
+      company: "Innopay (client project)",
+      period: "2026",
+      color: "var(--area-app)",
+      summary: "TVMAX subscribers use this app to manage their channel packs and set-top boxes, and to pay for them. I started the app and wrote most of it.",
+      stack: ["Flutter", "Riverpod", "go_router", "Dio", "UPI intents", "Firebase"],
+      features: [
+        {
+          id: "tvmax",
+          title: "Pick your channels, pay with UPI",
+          short: "Plans and payments",
+          what: "Choose channel packs, see the bill, pay with any UPI app and get back to watching.",
+          built: [
+            "Feature-first architecture on Riverpod, go_router and Dio, from the first commit",
+            "Plan management across tabs that keeps your picks and requires a base plan",
+            "Checkout with a bill estimate, UPI app payments on Android and iOS, and status checks once you return",
+            "Add a set-top box by scanning its QR code, gated on GPS location",
+            "Push notifications that open the related transaction, with refunds shown clearly",
+            "OTP login with autofill, secure storage and Crashlytics"
+          ],
+          demo: "tvmax",
+          hint: "The phone runs a full purchase."
+        }
+      ]
     },
+
     {
-      id: "plans",
-      area: "Payments",
-      title: "Finding the right recharge plan",
-      date: "29 Jul 2026",
-      hash: "8ebb62e37",
-      stat: "9 files, +999 −148",
-      before: "Prepaid plans were one long list per category. There was no way to search by price or data, and an empty category simply showed nothing.",
-      after: "Plans moved into a draggable sheet that snaps between 40% and full height based on swipe speed, with a search bar, swipeable category tabs and clearer plan cards. When nothing matches, it says so and suggests similar plans.",
-      hint: "Type in the After phone's search bar. Try 299, 2GB, or something with no match.",
-      replay: false,
-      code: {
-        file: "lib/ui/screens/pre_and_post_bill_payments/recharge/recharge_plans_sheet.dart",
-        diff: `@@ new draggable sheet @@
-+        minChildSize: 0.4,
-+        maxChildSize: maxSize,
-@@
-+  onVerticalDragEnd: (details) {
-+    if (draggableScrollableController.isAttached) {
-+      final velocity = details.primaryVelocity ?? 0;
-+      final currentSize = draggableScrollableController.size;
-+      // Snap to full or min based on velocity or position
-+      if (velocity < -500 ||
-+          (velocity >= -500 && velocity <= 500 && currentSize > 0.7)) {
-+        // Swipe up fast or already past 70% - snap to full
-+        draggableScrollableController.animateTo(1.0,
-+            duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
-+      } else if (velocity > 500 ||
-+          (velocity >= -500 && velocity <= 500 && currentSize <= 0.7)) {
-+        // Swipe down fast or below 70% - snap to min
-+        draggableScrollableController.animateTo(0.4,
-+            duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
-+      }
-+    }
-+  },`
-      }
-    },
-    {
-      id: "confirmation",
-      area: "Payments",
-      title: "A payment receipt that leads somewhere",
-      date: "21 Jan 2026",
-      hash: "11914cc9d",
-      stat: "1 file, +247 −77",
-      before: "After paying, people saw a tick, the amount and a list of details. The only way forward was Done, so the screen was a dead end.",
-      after: "The revamped confirmation keeps the receipt but adds a scrollable row of top services with a Popular badge on the first one, and a rotating offer strip whose icon and page dots stay fixed while only the text slides.",
-      hint: "Watch the offer strip at the bottom of the After screen.",
-      replay: false,
-      code: {
-        file: "lib/ui/screens/pre_and_post_bill_payments/payment_confirmation_screen_v2.dart",
-        diff: `@@ -560,7 +590,10 @@
--  Widget _buildServiceItem(TopService service) {
-+  Widget _buildServiceItem(TopService service, int index) {
-+    // Show "Popular" badge only on first item
-+    final showBadge = index == 0;
-+
-     return GestureDetector(
-@@ -576,50 +607,189 @@
-       child: SizedBox(
--        width: 70,
-+        width: 80,
-@@
-+          // Percentage icon in circle (constant - stays in place)
-+          // Carousel with sliding text only
-+          // Pagination dots (constant - outside carousel, stays in place)`
-      }
-    },
-    {
-      id: "reply",
-      area: "Messenger",
-      title: "Swipe a message to reply",
-      date: "12 Aug 2025",
-      hash: "af61b7728",
-      stat: "20 files, +607 −178",
-      before: "In Messenger you could answer the last message, but there was no way to point at an earlier one, so conversations got confusing fast.",
-      after: "Swipe any bubble to the right to reply. A preview with the sender's name sits above the input, the sent message carries the quoted bubble, and the reply id travels to the server and the local cache.",
-      hint: "The After phone plays a swipe-to-reply on a loop.",
-      replay: true,
-      code: {
-        file: "lib/features/messenger/components/chat_input_bar.dart",
-        diff: `@@ new: swipe_message_widget.dart @@
-+class _SwipeableChatMessageState extends State<SwipeableChatMessage>
-+    with SingleTickerProviderStateMixin {
-+  late AnimationController _controller;
-+  late Animation<Offset> _animation;
-+  double _dragOffset = 0.0;
-@@ chat_input_bar.dart @@
-+    String? replyTo;
-+    if (messengerController.replyToMessage.value != null) {
-+      replyTo = messengerController.replyToMessage.value!.id!;
-+      messengerController.replyToMessage.value = null;
-+    }
-+    await widget.onSendButtonPressed(text, replyTo);
-@@ message_card.dart @@
-+    final replyMessage = localMessageController
-+        .conversationMessages
-+        .firstWhereOrNull((element) =>
-+            message.metadata?.replyTo != null &&
-+            element.id == message.metadata?.replyTo);`
-      }
-    },
-    {
-      id: "entry",
-      area: "Messenger",
-      title: "Messages that arrive, not appear",
-      date: "23 Sep 2026",
-      hash: "b3f358ba0",
-      stat: "6 files, +132 −78",
-      before: "New messages popped into the list in a single frame. Everything above jumped up, and it was easy to lose your place mid-conversation.",
-      after: "A just-arrived message now grows its slot over 300ms, pushing earlier messages up smoothly. Only messages from the last three seconds animate, so scrolling back through history stays still.",
-      hint: "Both phones receive the same messages. Watch how the older bubbles move.",
-      replay: true,
-      code: {
-        file: "lib/features/messenger/components/message_entry_animation.dart",
-        diff: `@@ new file, 60 lines @@
-+/// Slides a just-arrived message up into place, the way a chat app does when
-+/// you hit send. Older messages build without animating, so scrolling back
-+/// through history — which rebuilds their cards — stays still.
-+class MessageEntryAnimation extends StatefulWidget {
-+  static const _newMessageWindow = Duration(seconds: 3);
-+
-+  bool get _isNew =>
-+      DateTime.now().difference(sentAt.toLocal()) < _newMessageWindow;
-@@
-+    if (widget._isNew) {
-+      _controller = AnimationController(
-+        vsync: this,
-+        duration: const Duration(milliseconds: 300),
-+      )..forward();
-+    }
-@@
-+    // Growing the slot is what pushes the earlier messages up; the slide alone
-+    // only moves the bubble inside space the list already made for it.
-+    return SizeTransition(
-+      sizeFactor: curve,
-+      alignment: Alignment.topRight,
-+      child: widget.child,
-+    );`
-      }
-    },
-    {
-      id: "offline",
-      area: "App-wide",
-      title: "Going offline, gracefully",
-      date: "29 Jul 2026",
-      hash: "c66e5f8d3",
-      stat: "9 files, +229 −142",
-      before: "Losing signal showed a snackbar that vanished after a few seconds. Every tap fired another one, and nothing told you when the connection came back.",
-      after: "A single floating sheet explains the problem and stays until it's useful to leave: it listens to the connection and dismisses itself the moment you're back online. Taps are debounced so it can't stack.",
-      hint: "Tap Pay in either phone while offline, then wait for the connection to return.",
-      replay: true,
-      code: {
-        file: "lib/components/no_internet_bottom_sheet.dart",
-        diff: `@@ new file @@
-+class _NoInternetBottomSheetState extends State<NoInternetBottomSheet> {
-+  StreamSubscription<DataConnectionStatus>? _statusSubscription;
-+
-+  @override
-+  void initState() {
-+    super.initState();
-+    _statusSubscription =
-+        DataConnectionChecker().onStatusChange.listen((status) {
-+      if (status == DataConnectionStatus.connected && mounted) {
-+        Get.back();
-+      }
-+    });
-+    DataConnectionChecker().startMonitoring();
-+  }
-@@ categories_section_widget.dart @@
--        context.showNetworkAppSnackbar(
--            message: "Please check your internet connectivity");
-+        // ScaffoldMessenger.of(context).clearSnackBars();
-+        // context.showNetworkAppSnackbar(...)`
+      id: "vinegypsy",
+      name: "Vine Gypsy",
+      kind: "Wine tasting-room guide",
+      company: "Zemusi, for Vine Gypsy LLC",
+      period: "2023 to 2024",
+      color: "var(--area-payments)",
+      summary: "Vine Gypsy helps people find wine tasting rooms worth visiting, with reviews from certified wine professionals and other visitors. I was its only developer: I built the app from the first commit to its App Store and Play Store launch in 2024, then added tablet and web versions.",
+      stack: ["Flutter", "Firebase", "Cloud Functions", "Google Maps", "Riverpod", "go_router"],
+      features: [
+        {
+          id: "vine-discover",
+          title: "Find a tasting room worth the drive",
+          short: "Map and filters",
+          what: "Browse tasting rooms on a map or a list and narrow them down to the kind of visit you want.",
+          built: [
+            "Google Maps with tasting-room markers, an info sheet and a slide-up list",
+            "Filters for rating, wine quality, price, food pairing and service",
+            "Search by name or address with Google Places",
+            "Paginated lists with cached images, after I tracked down an image-cache memory leak"
+          ],
+          demo: "vine",
+          hint: "Tap the filters."
+        },
+        {
+          id: "vine-review",
+          title: "Reviews you can trust",
+          short: "Guided reviews",
+          what: "A step-by-step review that asks the same questions of every visit, so ratings mean the same thing everywhere.",
+          built: [
+            "A review form whose questions come from the backend, so they change without an app release, with required ratings checked before you submit",
+            "Photos compressed on the phone before upload to Firebase Storage",
+            "Certified wine professionals upload a certificate; admins get an approval email",
+            "Reviews can be edited later, and ratings roll up into each room's score"
+          ],
+          demo: "vineReview",
+          hint: "The phone fills in a review."
+        },
+        {
+          id: "vine-community",
+          title: "Follow people whose taste you trust",
+          short: "Community",
+          what: "Follow reviewers, see who's most active, and hear about it when people you follow review or visit somewhere new.",
+          built: [
+            "Followers, following and a top-reviewers list ranked by reviews",
+            "Public profiles with privacy controls and a report option",
+            "Profile links you can share that open in the app on Android, iOS and the web",
+            "Notifications sent by Firebase Cloud Functions when someone you follow reviews, visits or follows you"
+          ],
+          demo: "vineCommunity",
+          hint: "New notifications arrive on their own."
+        },
+        {
+          id: "vine-owner",
+          title: "Tools for tasting-room owners",
+          short: "For owners",
+          what: "Owners can claim their tasting room and keep it up to date, and visitors can keep notes on what they tasted.",
+          built: [
+            "Claim a tasting room, with a pending state until an admin approves it",
+            "Edit details, opening hours, the wine list and events",
+            "Tasting notes for each wine, grouped by visit",
+            "Wishlist, favourites, visited and membership lists, plus designated-driver tours"
+          ],
+          demo: "vineRoom",
+          hint: "Switch between Wines, Events and Hours."
+        }
+      ],
+      underTheHood: {
+        title: "Also on Vine Gypsy",
+        items: [
+          ["Sign-in", "Email, Google and Sign in with Apple, guest browsing and account deletion."],
+          ["Tablet and landscape", "Responsive layouts for tablets and rotating carousels."],
+          ["Runs on the web", "A Progressive Web App build from the same codebase."],
+          ["Releases", "Play Store and App Store builds, signing and Crashlytics."]
+        ]
       }
     }
   ],
 
-  fixes: [
+  jobs: [
     {
-      area: "Messenger",
-      title: "Contact sync stopped running out of memory",
-      why: "On phones with thousands of contacts, sync loaded photos, notes and addresses it never used. Asking for names and numbers only fixed the crash in four lines.",
-      date: "7 Oct 2026",
-      hash: "b2154bda2",
-      file: "lib/features/messenger/helpers/messenger_helper.dart",
-      diff: `@@ -190,7 +190,10 @@ class MessengerHelper {
-   static Future<List<contact.Contact>> fetchContacts() async {
-     List<contact.Contact> contacts = await contact.FlutterContacts.getAll(
--      properties: contact.ContactProperties.all,
-+      properties: const {
-+        contact.ContactProperty.name,
-+        contact.ContactProperty.phone,
-+      },
-     );
-     return contacts;
-   }`
+      company: "Innopay",
+      role: "Flutter engineer",
+      period: "Apr 2025 to now",
+      text: "Messenger, home, payments and platform work on the Innopay consumer app; merchant flows on Innopay Business; and the TVMAX subscriber app for a client."
     },
     {
-      area: "App-wide",
-      title: "One tap opens one screen",
-      why: "Two quick taps, or two fingers in the same frame, could push the same screen twice. A tiny leading-edge guard blocks it before the route stack even updates.",
-      date: "6 Aug 2026",
-      hash: "8b06f2674",
-      file: "lib/utils/tap_guard.dart",
-      diff: `@@ new file @@
-+/// Global leading-edge guard against rapid duplicate taps that push the same
-+/// screen twice. The first tap is allowed; any tap within [_windowMs] is
-+/// ignored. Unlike GetX's \`preventDuplicates\`, this also blocks two fingers
-+/// tapping in the same frame (before the route stack updates).
-+abstract class TapGuard {
-+  static int _lastMs = 0;
-+  static const int _windowMs = 600;
-+
-+  static bool allow() {
-+    final now = DateTime.now().millisecondsSinceEpoch;
-+    if (now - _lastMs < _windowMs) return false;
-+    _lastMs = now;
-+    return true;
-+  }
-+}`
-    },
-    {
-      area: "Messenger",
-      title: "Failed messages say they failed",
-      why: "A message that never reached the server still showed a clock and later looked sent. Now it gets its own failed state and a red marker, and the send call returns the real error.",
-      date: "1 Oct 2026",
-      hash: "170253697",
-      file: "lib/features/messenger/components/msg_status_tick_widget.dart",
-      diff: `@@
--enum MsgStatus { pending, sent, delivered, read }
-+enum MsgStatus { pending, failed, sent, delivered, read }
-@@
--    message.id == null && message.msgStatusList.isEmpty
--        ? MsgStatus.pending
-+    message.id == null
-+        ? message.msgStatusList.isEmpty
-+            ? MsgStatus.pending
-+            : MsgStatus.failed
-@@
--  Future<bool> sendMessage(
-+  Future<Either<MessageResponse, MessengerErrorModel>> sendMessage(`
-    },
-    {
-      area: "Messenger",
-      title: "Chats recover after a reconnect",
-      why: "When the websocket dropped and came back, the server forgot you were looking at a chat, so read receipts stopped. The open chat now re-activates itself on reconnect.",
-      date: "7 Oct 2026",
-      hash: "c5d45f3c3",
-      file: "lib/features/messenger/controller/messenger_web_socket_controller.dart",
-      diff: `@@ -269,6 +270,21 @@
-+  Future<void> _reactivateOpenChat() async {
-+    final convo = localMessengerController.currentConversationLocal.value;
-+    final participant = MsgChatHelper.participantUser;
-+    if (Get.currentRoute != AppMacros.MESSENGER_CHAT_SCREEN_ROUTE ||
-+        messengerController.appPaused.value ||
-+        convo.isReadOnly ||
-+        (convo.isBlocked ?? false) ||
-+        participant.id == -1) {
-+      return;
-+    }
-+    await messengerController.setChatStatus(
-+        setChatStatusRequest:
-+            SetChatStatusRequest(vieweeUserId: participant.id, isActive: 1));
-+  }
-@@ -294,6 +310,7 @@
-         isConnected.value=true;
-         _startStabilityTimer();
-+        await _reactivateOpenChat();`
-    },
-    {
-      area: "Messenger",
-      title: "Moved the chat cache from Hive to SQLite",
-      why: "Messenger's offline store moved from Hive boxes to six SQLite tables, with a one-time migration that carries existing users' chats across on first launch and a written migration guide for the team.",
-      date: "12 Jun 2026",
-      hash: "8454cd666",
-      file: "25 files, +1,710 −429",
-      diff: `@@ summary @@
-+          CREATE TABLE conversations (...)
-+          CREATE TABLE messages (...)
-+          CREATE TABLE contacts (...)
-+          CREATE TABLE users (...)
-+          CREATE TABLE user_data (...)
-+          CREATE TABLE server_sync (...)
-@@ messenger_db_migration.dart @@
-+/// One-time Hive → sqflite copy, guarded by the
-+/// \`messenger_migrated_to_sqflite\` flag in SharedPreferences.
-+class MessengerDbMigration {`
-    },
-    {
-      area: "Platform",
-      title: "iOS builds moved to Swift Package Manager",
-      why: "Moved the iOS project's native dependencies from CocoaPods to Swift Package Manager, Flutter's direction for iOS, and the change removed more configuration than it added.",
-      date: "29 Sep 2026",
-      hash: "491141de9",
-      file: "ios/Runner.xcodeproj/project.pbxproj and 9 more",
-      diff: `@@ summary @@
-- Podfile-driven dependency setup
-+ Swift Package Manager integration in the Xcode project
-  10 files changed, +397 −632`
-    },
-    {
-      area: "Platform",
-      title: "Ready for Android 16's edge-to-edge",
-      why: "Targeting SDK 36 makes edge-to-edge mandatory, which pushed buttons under the navigation bar. Insets now come from the system everywhere, with the status bar transparent.",
-      date: "21 Aug 2026",
-      hash: "1b2a87541",
-      file: "8 files, +27 −17",
-      diff: `@@ main.dart @@
-+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-+  // Explicit edge-to-edge so behavior matches Android 16 (target SDK 36) on all OS versions.
-+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-@@ bottom sheets @@
--      padding: EdgeInsets.only(top: widget.paddingTop, bottom: MediaQuery.viewInsetsOf(context).bottom),
-+      // max(): keyboard inset when open, nav-bar inset otherwise (edge-to-edge).
-+      padding: EdgeInsets.only(
-+        top: widget.paddingTop,
-+        bottom: max(MediaQuery.viewInsetsOf(context).bottom,
-+            MediaQuery.paddingOf(context).bottom),
-+      ),`
+      company: "Zemusi",
+      role: "Flutter developer",
+      period: "Until early 2025",
+      text: "Client apps, including Vine Gypsy, which I built on my own from the first commit to launch, and Finsco."
     }
   ],
 
-  months: [
-    {"m":"2025-06","App-wide":4,"Platform":2,"Messenger":4},
-    {"m":"2025-07","Messenger":7},
-    {"m":"2025-08","Messenger":7,"Payments":1},
-    {"m":"2025-09","Messenger":6,"Platform":1,"Payments":1},
-    {"m":"2025-10","Payments":1,"Messenger":3},
-    {"m":"2025-11","Messenger":2},
-    {"m":"2025-12","Messenger":2,"App-wide":1,"Platform":1},
-    {"m":"2026-01","Messenger":1,"App-wide":1,"Payments":2},
-    {"m":"2026-02","Messenger":8,"Platform":1,"Payments":12,"App-wide":1},
-    {"m":"2026-03","Platform":2,"Messenger":4,"Home":3,"Payments":3},
-    {"m":"2026-04","Payments":1,"Home":2,"App-wide":1,"Messenger":1},
-    {"m":"2026-05","Payments":3,"Platform":4,"Messenger":2},
-    {"m":"2026-06","Messenger":1},
-    {"m":"2026-07","Platform":2,"Payments":7,"Home":2,"App-wide":2,"Messenger":1},
-    {"m":"2026-08","Platform":8,"Payments":11,"Home":7,"Messenger":4,"App-wide":6},
-    {"m":"2026-09","Messenger":6,"Platform":5,"Payments":4,"App-wide":4,"Home":2},
-    {"m":"2026-10","App-wide":4,"Platform":5,"Home":3,"Payments":6,"Messenger":12},
-    {"m":"2026-11","Payments":2}
-  ],
-
-  flags: {
-    "2025-06": "Messenger v1",
-    "2026-02": "Payments revamp",
-    "2026-08": "New home"
-  }
+  skills: [
+    ["Flutter & Dart", "GetX, Riverpod, go_router, isolates, custom animations"],
+    ["Native", "Kotlin and Swift method channels, Android SDK upgrades, Xcode, Swift Package Manager"],
+    ["Data", "REST with Dio, WebSockets, SQLite, Hive, secure storage, offline sync"],
+    ["Payments", "UPI intent flows, payment gateways, bill payments"],
+    ["Shipping", "Firebase Messaging, Crashlytics and Analytics, deep links, in-app updates, Play Store and App Store releases"]
+  ]
 };

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bibek Panda, Flutter engineer</title>
-  <meta name="description" content="Bibek Panda builds the Innopay payments app in Flutter. Real before-and-after changes from 18 months of shipped work.">
+  <meta name="description" content="Bibek Panda builds Android and iOS apps in Flutter: payments, messaging, merchant tools and IPTV. Work from Innopay and Zemusi.">
   <meta name="theme-color" content="#ECEFF3">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='7' y='2' width='18' height='28' rx='5' fill='%231A2238'/%3E%3Crect x='10' y='8' width='12' height='4' rx='2' fill='%23E9A400'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,16 +13,15 @@
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-  <a class="skip" href="#bench">Skip to the work</a>
+  <a class="skip" href="#work">Skip to work</a>
 
   <header class="top">
     <a class="mark" href="#" aria-label="Bibek Panda, home">
       <span class="mark-phone" aria-hidden="true"></span>bibek panda
     </a>
     <nav aria-label="Sections">
-      <a href="#bench">Before &amp; after</a>
-      <a href="#fixes">Fixes</a>
-      <a href="#timeline">Timeline</a>
+      <a href="#work">Work</a>
+      <a href="#experience">Experience</a>
       <a href="#contact">Contact</a>
     </nav>
   </header>
@@ -31,109 +30,47 @@
     <section class="hero" aria-labelledby="hero-name">
       <h1 id="hero-name" class="hero-name">Bibek<br>Panda</h1>
       <div class="hero-side">
-        <p class="hero-role">Flutter engineer at Innopay</p>
+        <p class="hero-role">Flutter engineer</p>
         <p class="hero-intro">
-          For the last eighteen months I've been building the Innopay app: its Messenger
-          from the first screen up, the home screen people open every day, and much of
-          the recharge and bill-payment flow.
+          I build Android and iOS apps that people pay, chat and watch TV with. For four years
+          I've shipped fintech and consumer products in Flutter, at Innopay today and at Zemusi before that.
         </p>
-        <p class="hero-facts" id="hero-facts">
-          <span><strong data-stat="total">199</strong> commits</span>
-          <span><strong data-stat="files">800+</strong> files touched</span>
+        <p class="hero-facts">
+          <span><strong>Payments</strong> and UPI</span>
+          <span><strong>Real-time</strong> chat</span>
           <span><strong>Android &amp; iOS</strong> from one codebase</span>
         </p>
       </div>
     </section>
 
-    <section id="bench" class="bench" aria-labelledby="bench-title">
+    <section id="work" class="index" aria-labelledby="work-title">
       <div class="section-head">
-        <h2 id="bench-title">Before and after</h2>
-        <p>
-          Seven changes I shipped to <code>innopay-user-app-fl</code>, each rebuilt as a working
-          skeleton from the commit's own widget code. Tap through them, play with the screens,
-          or switch a pair to the diff.
-        </p>
+        <h2 id="work-title">Selected work</h2>
+        <p>Apps I've built or helped build, with the features I owned in each.</p>
       </div>
-
-      <div class="bench-layout">
-        <ol class="case-list" id="case-list" aria-label="Changes"></ol>
-
-        <div class="bench-stage" id="bench-stage" aria-live="polite">
-          <div class="stage-bar">
-            <div class="stage-meta">
-              <p class="stage-area" id="stage-area"></p>
-              <h3 class="stage-title" id="stage-title"></h3>
-              <p class="stage-commit" id="stage-commit"></p>
-            </div>
-            <div class="stage-controls">
-              <div class="seg" role="tablist" aria-label="View">
-                <button role="tab" id="view-screens" aria-selected="true" data-view="screens">Screens</button>
-                <button role="tab" id="view-code" aria-selected="false" data-view="code">Code</button>
-              </div>
-              <button class="replay" id="replay" type="button">Replay</button>
-            </div>
-          </div>
-
-          <div class="stage-body">
-            <div class="phones" id="phones">
-              <figure class="device before">
-                <figcaption><span class="tag tag-before">Before</span><span class="cap-hash" id="hash-before"></span></figcaption>
-                <div class="phone"><div class="island"></div><div class="screen" id="screen-before"></div></div>
-              </figure>
-              <div class="arrow" aria-hidden="true"></div>
-              <figure class="device after">
-                <figcaption><span class="tag tag-after">After</span><span class="cap-hash" id="hash-after"></span></figcaption>
-                <div class="phone"><div class="island"></div><div class="screen" id="screen-after"></div></div>
-              </figure>
-            </div>
-            <div class="code-view" id="code-view" hidden></div>
-          </div>
-
-          <div class="stage-notes">
-            <div>
-              <h4>What was wrong</h4>
-              <p id="note-before"></p>
-            </div>
-            <div>
-              <h4>What I changed</h4>
-              <p id="note-after"></p>
-            </div>
-            <p class="stage-hint" id="stage-hint"></p>
-          </div>
-        </div>
-      </div>
-      <p class="disclaimer">
-        Screens are skeleton recreations built from each commit's layout code, not screenshots;
-        the highlighted area is what the commit changed. Code excerpts are trimmed and contain
-        no endpoints or configuration.
-      </p>
+      <ul class="project-index" id="project-index"></ul>
     </section>
 
-    <section id="fixes" class="fixes" aria-labelledby="fixes-title">
-      <div class="section-head">
-        <h2 id="fixes-title">Fixes you can't see</h2>
-        <p>Some of my most useful commits change nothing on screen. They stop crashes, lost messages and double taps.</p>
-      </div>
-      <ul class="fix-list" id="fix-list"></ul>
-    </section>
+    <div id="projects"></div>
 
-    <section id="timeline" class="timeline" aria-labelledby="timeline-title">
+    <section id="experience" class="experience" aria-labelledby="exp-title">
       <div class="section-head">
-        <h2 id="timeline-title">Eighteen months, month by month</h2>
-        <p>My commits to the app since June 2025, grouped by the part of the app they touched. Cherry-picks across release branches are counted once.</p>
+        <h2 id="exp-title">Experience</h2>
+        <p>Where the work above was done.</p>
       </div>
-      <div class="chart" id="chart" role="img"></div>
-      <ul class="legend" id="legend"></ul>
+      <ol class="jobs" id="jobs"></ol>
+      <div class="skills" id="skills"></div>
     </section>
   </main>
 
   <footer id="contact" class="contact">
     <h2>Say hello</h2>
     <p>I'm happy to walk through any of this work in more depth.</p>
-    <p class="contact-links">
-      <a href="https://github.com/bibekpanda55">github.com/bibekpanda55</a>
+    <p class="contact-links" id="contact-links"></p>
+    <p class="fine">
+      App screens on this page are working mockups rebuilt from each app's own layout code, not screenshots,
+      and contain no real customer data. Built by hand and deployed with GitHub Actions.
     </p>
-    <p class="fine">Built by hand in HTML, CSS and a little JavaScript. Deployed with GitHub Actions.</p>
   </footer>
 
   <script src="assets/data.js"></script>
