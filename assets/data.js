@@ -252,6 +252,69 @@ window.PORTFOLIO = {
           ["Releases", "Play Store and App Store builds, signing and Crashlytics."]
         ]
       }
+    },
+    {
+      id: "finsco",
+      name: "Finsco",
+      kind: "Investing app for stocks, crypto and ETFs",
+      company: "Zemusi",
+      period: "2022 to 2023",
+      color: "var(--area-messenger)",
+      summary: "Finsco (first called Rumo) lets investors follow stocks, crypto and ETFs in one place, with a score and report for each holding and a community for trading ideas. I was the app's main developer, writing most of its screens and integrations.",
+      stack: ["Flutter", "Provider", "Plaid", "Firebase", "RevenueCat", "fl_chart"],
+      features: [
+        {
+          id: "fin-portfolio",
+          title: "Your whole portfolio in one place",
+          short: "Portfolio",
+          what: "Link a brokerage account or add holdings by hand, and see what everything is worth today.",
+          built: [
+            "Brokerage linking with Plaid on Android and iOS",
+            "A manual portfolio for accounts Plaid can't reach",
+            "Portfolio valuation, holdings and allocation, calculated in the background",
+            "Performance charts that redraw for each time range"
+          ],
+          demo: "finPortfolio",
+          hint: "Switch the time range above the chart."
+        },
+        {
+          id: "fin-research",
+          title: "A score and a report for every ticker",
+          short: "Research",
+          what: "Each stock, coin and ETF gets a score and a short report, so people can judge it at a glance before going deeper.",
+          built: [
+            "Score and report screens for stocks, crypto and ETFs, driven by live ticker data",
+            "Watchlists you can add to from any report",
+            "Ticker search with suggestions as you type",
+            "Curated stock and crypto picks, news and a resource center"
+          ],
+          demo: "finResearch",
+          hint: "Tap the star to watch this ticker."
+        },
+        {
+          id: "fin-community",
+          title: "Ideas from other investors",
+          short: "Community",
+          what: "A feed where investors share ideas, comment, like and follow each other.",
+          built: [
+            "Posts with images, comments and likes, plus a create-post flow",
+            "Community profiles with follow and follower lists",
+            "Filters for the ideas feed and community rules",
+            "Push notifications that open the related post"
+          ],
+          demo: "finCommunity",
+          hint: "Tap the heart."
+        }
+      ],
+      underTheHood: {
+        title: "Also on Finsco",
+        items: [
+          ["Sign-in", "Email with OTP verification and Sign in with Apple, on Firebase Auth."],
+          ["Biometric unlock", "Face ID and fingerprint to open the app."],
+          ["Subscriptions", "In-app subscriptions on both stores through RevenueCat."],
+          ["Offline-friendly", "Local caching with Hive for the data people check most."]
+        ]
+      }
     }
   ],
 
@@ -265,8 +328,8 @@ window.PORTFOLIO = {
     {
       company: "Zemusi",
       role: "Flutter developer",
-      period: "Until early 2025",
-      text: "Client apps, including Vine Gypsy, which I built on my own from the first commit to launch, and Finsco."
+      period: "2022 to early 2025",
+      text: "Client apps in Flutter. I was the main developer of Finsco, an investing app, and built Vine Gypsy, a wine tasting-room guide, on my own from the first commit to launch."
     }
   ],
 

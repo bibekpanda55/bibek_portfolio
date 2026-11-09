@@ -669,6 +669,131 @@
     show("Wines");
   };
 
+  /* ---------- Finsco ---------- */
+  const FIN = "#1F6FEB", FIN_UP = "#16A06A", FIN_DN = "#D64545", FIN_BG = "#0F1524", FIN_CARD = "#182036";
+  const finSeries = (n, seed, drift) => {
+    let v = 50, out = [];
+    for (let i = 0; i < n; i++) { seed = (seed * 9301 + 49297) % 233280; v += (seed / 233280 - .5) * 9 + drift; out.push(v); }
+    return out;
+  };
+  const linePath = (pts, w, h) => {
+    const mn = Math.min(...pts), mx = Math.max(...pts);
+    return pts.map((p, i) => `${i ? "L" : "M"}${(i / (pts.length - 1) * w).toFixed(1)},${(h - (p - mn) / (mx - mn || 1) * (h - 8) - 4).toFixed(1)}`).join("");
+  };
+
+  demos.finPortfolio = (a) => {
+    const ranges = { "1D": [24, 7, .25, "+$412.80", "+0.9%"], "1W": [30, 3, .5, "+$1,284.10", "+2.8%"], "1M": [40, 11, -.05, "−$356.40", "−0.8%"], "1Y": [52, 5, .9, "+$8,940.55", "+23.6%"] };
+    const hold = [["AAPL", "Apple", "$12,480", "+1.2%"], ["BTC", "Bitcoin", "$9,215", "+3.4%"], ["VOO", "Vanguard S&P 500", "$15,602", "+0.6%"], ["TSLA", "Tesla", "$4,330", "−2.1%"]];
+    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:${FIN_BG};color:#fff">
+      ${sb(true)}
+      <div class="pad"><div style="font-size:10px;color:#93A0BD">Portfolio value</div>
+        <b style="font:800 26px var(--display)">$41,627.30</b>
+        <div class="chg" style="font-size:11px;font-weight:600;margin-top:2px"></div></div>
+      <div style="padding:10px 0 0;position:relative">
+        <svg class="ch" viewBox="0 0 256 110" width="100%" height="110" preserveAspectRatio="none" style="display:block">
+          <path class="area" d="" fill="url(#g1)" opacity=".35"/><path class="ln" d="" fill="none" stroke-width="2" stroke-linejoin="round"/>
+          <defs><linearGradient id="g1" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#16A06A"/><stop offset="1" stop-color="#16A06A" stop-opacity="0"/></linearGradient></defs>
+        </svg>
+      </div>
+      <div class="pad row rg" role="tablist" style="justify-content:space-between;margin:8px 0 12px">
+        ${Object.keys(ranges).map((k, i) => `<button role="tab" data-k="${k}" aria-selected="${i === 3}" style="border:0;border-radius:8px;padding:5px 12px;font:600 10.5px var(--body);cursor:pointer;background:${i === 3 ? FIN_CARD : "transparent"};color:${i === 3 ? "#fff" : "#93A0BD"}">${k}</button>`).join("")}
+      </div>
+      <div class="pad" style="flex:1">
+        <div class="row" style="justify-content:space-between;margin-bottom:6px"><b style="font-size:12px">Holdings</b><span style="font-size:10px;color:#93A0BD">Linked with Plaid</span></div>
+        ${hold.map(h => `<div class="row" style="padding:9px 0;border-bottom:1px solid #222B44">
+          <span style="width:30px;height:30px;border-radius:9px;background:${FIN_CARD};display:grid;place-items:center;font-size:8.5px;font-weight:700">${h[0]}</span>
+          <div style="flex:1"><b style="font-size:11px">${h[0]}</b><div style="font-size:9.5px;color:#93A0BD">${h[1]}</div></div>
+          <div style="text-align:right"><b style="font-size:11px">${h[2]}</b><div style="font-size:9.5px;color:${h[3][0] === "−" ? FIN_DN : FIN_UP}">${h[3]}</div></div></div>`).join("")}
+      </div>
+    </div>`;
+    const ln = a.querySelector(".ln"), ar = a.querySelector(".area"), chg = a.querySelector(".chg"), stop = a.querySelectorAll("stop");
+    const show = (k) => {
+      const [n, seed, drift, d, pct] = ranges[k];
+      const up = d[0] === "+", col = up ? FIN_UP : FIN_DN;
+      const path = linePath(finSeries(n, seed, drift), 256, 110);
+      ln.setAttribute("d", path); ln.setAttribute("stroke", col);
+      ar.setAttribute("d", path + "L256,110L0,110Z");
+      stop.forEach(s => s.setAttribute("stop-color", col));
+      chg.textContent = `${d} (${pct}) ${k === "1D" ? "today" : "this " + { "1W": "week", "1M": "month", "1Y": "year" }[k]}`;
+      chg.style.color = col;
+      a.querySelectorAll(".rg button").forEach(b => { const on = b.dataset.k === k; b.setAttribute("aria-selected", on); b.style.background = on ? FIN_CARD : "transparent"; b.style.color = on ? "#fff" : "#93A0BD"; });
+      if (!reduced) {
+        const L = ln.getTotalLength ? ln.getTotalLength() : 600;
+        ln.style.transition = "none"; ln.style.strokeDasharray = L; ln.style.strokeDashoffset = L;
+        void ln.getBoundingClientRect();
+        ln.style.transition = "stroke-dashoffset .9s ease-out"; ln.style.strokeDashoffset = 0;
+      }
+    };
+    a.querySelectorAll(".rg button").forEach(b => b.addEventListener("click", () => show(b.dataset.k)));
+    show("1Y");
+  };
+
+  demos.finResearch = (a, t) => {
+    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:${FIN_BG};color:#fff;position:relative">
+      ${sb(true)}
+      <div class="pad row" style="justify-content:space-between;padding-bottom:8px">
+        <span style="color:#93A0BD;font-size:16px">‹</span>
+        <button class="star" aria-pressed="false" aria-label="Add to watchlist" style="border:0;background:transparent;font-size:18px;cursor:pointer;color:#93A0BD;transition:transform .2s">☆</button>
+      </div>
+      <div class="pad"><div class="row" style="gap:10px"><span style="width:38px;height:38px;border-radius:11px;background:${FIN_CARD};display:grid;place-items:center;font-weight:700;font-size:10px">MSFT</span>
+        <div><b style="font:700 15px var(--display)">Microsoft</b><div style="font-size:10px;color:#93A0BD">NASDAQ: MSFT</div></div></div></div>
+      <div class="pad" style="margin-top:14px">
+        <div style="background:${FIN_CARD};border-radius:16px;padding:14px;display:flex;gap:14px;align-items:center">
+          <svg width="76" height="76" viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="38" r="31" fill="none" stroke="#222B44" stroke-width="8"/>
+            <circle class="gauge" cx="38" cy="38" r="31" fill="none" stroke="${FIN_UP}" stroke-width="8" stroke-linecap="round" transform="rotate(-90 38 38)" stroke-dasharray="194.8" stroke-dashoffset="194.8" style="transition:stroke-dashoffset 1.2s ease-out"/>
+            <text class="gnum" x="38" y="44" text-anchor="middle" fill="#fff" style="font:800 19px var(--display)">0</text></svg>
+          <div><div style="font-size:10px;color:#93A0BD">Finsco score</div><b style="font-size:13px">Strong</b><div style="font-size:9.5px;color:#93A0BD;margin-top:2px">Better than 86% of large caps</div></div>
+        </div>
+        <div style="margin-top:12px;font-size:11px;font-weight:700">Key data</div>
+        ${[["Price", "$418.52"], ["P/E ratio", "35.4"], ["Dividend yield", "0.72%"], ["52-week range", "$309 to $468"]].map(([k, v]) => `<div class="row" style="justify-content:space-between;padding:8px 0;border-bottom:1px solid #222B44"><span style="color:#93A0BD;font-size:10.5px">${k}</span><b style="font-size:10.5px">${v}</b></div>`).join("")}
+      </div>
+      <div class="wt" style="position:absolute;left:12px;right:12px;bottom:18px;background:#fff;color:var(--ink);border-radius:12px;padding:10px 12px;font-size:10.5px;opacity:0;transform:translateY(10px);transition:all .3s">Added Microsoft to your watchlist</div>
+    </div>`;
+    const g = a.querySelector(".gauge"), num = a.querySelector(".gnum"), star = a.querySelector(".star"), wt = a.querySelector(".wt");
+    const score = 82;
+    g.style.strokeDashoffset = 194.8 * (1 - score / 100);
+    if (reduced) num.textContent = score;
+    else { let v = 0; t.every(() => { if (v < score) num.textContent = ++v; }, 14); }
+    star.addEventListener("click", () => {
+      const on = star.getAttribute("aria-pressed") !== "true";
+      star.setAttribute("aria-pressed", on); star.textContent = on ? "★" : "☆"; star.style.color = on ? "#F2B705" : "#93A0BD";
+      star.style.transform = "scale(1.25)"; t.later(() => star.style.transform = "", 200);
+      wt.textContent = on ? "Added Microsoft to your watchlist" : "Removed from your watchlist";
+      wt.style.opacity = 1; wt.style.transform = "none";
+      t.later(() => { wt.style.opacity = 0; wt.style.transform = "translateY(10px)"; }, 1800);
+    });
+  };
+
+  demos.finCommunity = (a) => {
+    const posts = [
+      ["Priya N.", "2h", "Trimming my NVDA position after this run and moving some into VOO. Too much in one name.", 48, 12, ["#1F6FEB", "#16A06A"]],
+      ["Marcus L.", "5h", "ETH staking yields vs. dividend stocks: which do you hold for income?", 31, 22, null],
+      ["Aiko T.", "1d", "Finsco score on KO went up after earnings. Anyone adding?", 19, 7, null]
+    ];
+    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:${FIN_BG};color:#fff">
+      ${sb(true)}
+      <div class="pad row" style="justify-content:space-between;padding-bottom:8px"><b style="font:700 15px var(--display)">Ideas</b>
+        <span style="font-size:10px;background:${FIN};border-radius:999px;padding:5px 10px;font-weight:600">New post</span></div>
+      <div class="pad row" style="gap:6px;padding-bottom:8px">${["All", "Stocks", "Crypto", "Following"].map((x, i) => `<span style="font-size:10px;padding:4px 10px;border-radius:999px;background:${i ? FIN_CARD : "#fff"};color:${i ? "#C3CCE0" : FIN_BG};font-weight:600">${x}</span>`).join("")}</div>
+      <div class="pad" style="flex:1;overflow:hidden">
+        ${posts.map(([n, ago, txt, likes, cm, img], i) => `<div style="background:${FIN_CARD};border-radius:14px;padding:11px 12px;margin-top:8px">
+          <div class="row"><span class="circle" style="width:24px;height:24px;background:${["#8E6CEF", "#E08A3C", "#3CB4E0"][i]}"></span><b style="font-size:10.5px">${n}</b><span style="font-size:9.5px;color:#93A0BD">${ago}</span></div>
+          <div style="font-size:10.5px;line-height:1.45;margin-top:7px;color:#DDE3F0">${txt}</div>
+          ${img ? `<div style="height:58px;border-radius:10px;margin-top:8px;background:linear-gradient(120deg,${img[0]},${img[1]});opacity:.85"></div>` : ""}
+          <div class="row" style="gap:16px;margin-top:8px;font-size:10px;color:#93A0BD">
+            <button class="lk" data-n="${likes}" aria-pressed="false" style="border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;padding:0;display:flex;gap:4px;align-items:center"><span class="h" style="font-size:13px;transition:transform .2s">♡</span><span class="c">${likes}</span></button>
+            <span>💬 ${cm}</span><span>Share</span></div>
+        </div>`).join("")}
+      </div>
+    </div>`;
+    a.querySelectorAll(".lk").forEach(b => b.addEventListener("click", () => {
+      const on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", on);
+      const h = b.querySelector(".h"); h.textContent = on ? "♥" : "♡"; h.style.color = on ? "#F05D7A" : ""; h.style.transform = on ? "scale(1.3)" : "";
+      setTimeout(() => h.style.transform = "", 200);
+      b.querySelector(".c").textContent = +b.dataset.n + (on ? 1 : 0);
+    }));
+  };
+
   /* ================= explorer component ================= */
   class Explorer {
     constructor(root, project) {
