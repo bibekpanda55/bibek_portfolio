@@ -14,5 +14,5 @@ Live at **https://bibekpanda55.github.io/bibek_portfolio/**
 
 No build step: it's plain HTML, CSS and JavaScript. Open `index.html` in a browser to preview.
 
-App screens are working mockups rebuilt from each app's own layout code, not screenshots, and contain
+Finsco, Vine Gypsy and TVMAX use real screenshots (in `assets/img`); Innopay screens are working mockups and contain
 no real customer data.

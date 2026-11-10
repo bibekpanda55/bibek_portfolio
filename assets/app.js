@@ -436,7 +436,7 @@
   /* ---------- TVMAX ---------- */
   demos.tvmax = (a, t) => {
     const packs = [["Base Pack", "120 channels", 199, true], ["Sports Plus", "18 channels", 89, false], ["Kids", "12 channels", 49, false], ["Regional", "40 channels", 69, false]];
-    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:#12162A;color:#fff;position:relative">
+    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:#231310;color:#fff;position:relative">
       ${sb(true)}
       <div class="tv-body" style="flex:1;position:relative;overflow:hidden"></div>
       ${scrim}${upiSheet("Pay ₹337 with")}
@@ -449,29 +449,29 @@
       body.innerHTML = `
         <div class="pad" style="padding-top:4px"><b style="font:700 15px var(--display)">Manage plans</b>
           <div class="row" style="gap:6px;margin:10px 0 4px">
-            ${["Packs", "Channels", "Add-ons"].map((x, i) => `<span style="font-size:10px;font-weight:600;padding:5px 10px;border-radius:999px;background:${i ? "rgba(255,255,255,.08)" : "#E9A400"};color:${i ? "#C9CFE0" : "#1A2238"}">${x}</span>`).join("")}
+            ${["Packs", "Channels", "Add-ons"].map((x, i) => `<span style="font-size:10px;font-weight:600;padding:5px 10px;border-radius:999px;background:${i ? "rgba(255,255,255,.08)" : "#E8B9A2"};color:${i ? "#DCC6BC" : "#2A1712"}">${x}</span>`).join("")}
           </div>
           <div class="packs"></div>
         </div>
-        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 14px 20px;background:#1A2038;border-top:1px solid rgba(255,255,255,.08)" class="row">
-          <div style="flex:1"><div style="font-size:9.5px;color:#9AA4BC">Monthly total</div><b class="tv-tot" style="font:700 16px var(--display)">₹${totalOf()}</b></div>
-          <span class="tv-pay" style="background:#E9A400;color:#1A2238;border-radius:10px;padding:9px 16px;font-weight:700;font-size:11px">Checkout</span>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 14px 20px;background:#2E1A15;border-top:1px solid rgba(255,255,255,.08)" class="row">
+          <div style="flex:1"><div style="font-size:9.5px;color:#B9A097">Monthly total</div><b class="tv-tot" style="font:700 16px var(--display)">₹${totalOf()}</b></div>
+          <span class="tv-pay" style="background:#E8B9A2;color:#2A1712;border-radius:10px;padding:9px 16px;font-weight:700;font-size:11px">Checkout</span>
         </div>`;
       const host = body.querySelector(".packs");
       host.innerHTML = packs.map((p, i) => `
-        <div class="pack" data-i="${i}" style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid ${sel.has(i) ? "#E9A400" : "rgba(255,255,255,.08)"};border-radius:12px;padding:10px;margin-top:8px;transition:border-color .2s">
-          <span style="width:34px;height:34px;border-radius:9px;background:${["#4B5BD6", "#2E9C8A", "#C9637A", "#8A93A6"][i]}"></span>
-          <div style="flex:1"><b style="font-size:11.5px">${p[0]}</b>${p[3] ? `<span style="font-size:8.5px;margin-left:6px;color:#E9A400">Required</span>` : ""}<div style="font-size:9.5px;color:#9AA4BC">${p[1]}</div></div>
+        <div class="pack" data-i="${i}" style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid ${sel.has(i) ? "#E8B9A2" : "rgba(255,255,255,.08)"};border-radius:12px;padding:10px;margin-top:8px;transition:border-color .2s">
+          <span style="width:34px;height:34px;border-radius:9px;background:${["#8C4A36", "#5E7A3A", "#9A4E6A", "#6B5A52"][i]}"></span>
+          <div style="flex:1"><b style="font-size:11.5px">${p[0]}</b>${p[3] ? `<span style="font-size:8.5px;margin-left:6px;color:#E8B9A2">Required</span>` : ""}<div style="font-size:9.5px;color:#B9A097">${p[1]}</div></div>
           <b style="font-size:11.5px">₹${p[2]}</b>
-          <span class="chk" style="width:16px;height:16px;border-radius:5px;border:1.5px solid ${sel.has(i) ? "#E9A400" : "#5B6478"};background:${sel.has(i) ? "#E9A400" : "transparent"}"></span>
+          <span class="chk" style="width:16px;height:16px;border-radius:5px;border:1.5px solid ${sel.has(i) ? "#E8B9A2" : "#7A5A50"};background:${sel.has(i) ? "#E8B9A2" : "transparent"}"></span>
         </div>`).join("");
     };
     const toggle = (i) => {
       if (packs[i][3]) return;
       sel.has(i) ? sel.delete(i) : sel.add(i);
       const el = body.querySelector(`.pack[data-i="${i}"]`), c = el.querySelector(".chk");
-      el.style.borderColor = sel.has(i) ? "#E9A400" : "rgba(255,255,255,.08)";
-      c.style.borderColor = sel.has(i) ? "#E9A400" : "#5B6478"; c.style.background = sel.has(i) ? "#E9A400" : "transparent";
+      el.style.borderColor = sel.has(i) ? "#E8B9A2" : "rgba(255,255,255,.08)";
+      c.style.borderColor = sel.has(i) ? "#E8B9A2" : "#7A5A50"; c.style.background = sel.has(i) ? "#E8B9A2" : "transparent";
       body.querySelector(".tv-tot").textContent = "₹" + totalOf();
     };
     plansView();
@@ -482,316 +482,29 @@
     t.later(() => {
       body.innerHTML = `<div class="pad" style="padding-top:4px"><b style="font:700 15px var(--display)">Checkout</b>
         <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:12px;margin-top:12px">
-          ${[...sel].map(i => `<div class="row" style="justify-content:space-between;padding:5px 0"><span style="color:#C9CFE0">${packs[i][0]}</span><b>₹${packs[i][2]}</b></div>`).join("")}
+          ${[...sel].map(i => `<div class="row" style="justify-content:space-between;padding:5px 0"><span style="color:#DCC6BC">${packs[i][0]}</span><b>₹${packs[i][2]}</b></div>`).join("")}
           <div class="row" style="justify-content:space-between;padding:8px 0 0;margin-top:6px;border-top:1px dashed rgba(255,255,255,.15)"><span>Total incl. tax</span><b>₹337</b></div>
         </div>
-        <div style="margin-top:14px;font-size:10px;color:#9AA4BC">Pay with</div>
-        <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:11px 12px;margin-top:6px" class="row"><span style="flex:1">UPI app</span><span style="color:#E9A400">●</span></div>
+        <div style="margin-top:14px;font-size:10px;color:#B9A097">Pay with</div>
+        <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:11px 12px;margin-top:6px" class="row"><span style="flex:1">UPI app</span><span style="color:#E8B9A2">●</span></div>
         </div>
-        <div style="position:absolute;left:14px;right:14px;bottom:20px;background:#E9A400;color:#1A2238;border-radius:12px;padding:11px;text-align:center;font-weight:700">Pay ₹337</div>`;
+        <div style="position:absolute;left:14px;right:14px;bottom:20px;background:#E8B9A2;color:#2A1712;border-radius:12px;padding:11px;text-align:center;font-weight:700">Pay ₹337</div>`;
     }, 2900);
     t.later(() => { sc.style.opacity = 1; sheet.style.transform = "none"; }, 3900);
     t.later(() => { const ap = a.querySelectorAll(".upi-app")[1]; ap.style.transition = "transform .15s"; ap.style.transform = "scale(.9)"; }, 4800);
     t.later(() => {
       sc.style.opacity = 0; sheet.style.transform = "translateY(105%)";
       body.innerHTML = `<div style="text-align:center;padding-top:90px">
-        <span class="spin" style="display:inline-block;width:40px;height:40px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:#E9A400"></span>
+        <span class="spin" style="display:inline-block;width:40px;height:40px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:#E8B9A2"></span>
         <b style="display:block;margin-top:14px">Confirming your payment</b>
-        <div style="font-size:10px;color:#9AA4BC;margin-top:4px">Checking with your bank</div></div>`;
+        <div style="font-size:10px;color:#B9A097;margin-top:4px">Checking with your bank</div></div>`;
     }, 5300);
     t.later(() => {
       body.innerHTML = `<div style="text-align:center;padding-top:80px">${tickIcon("#2E9C8A", 56)}
         <b style="display:block;margin-top:14px;font:700 15px var(--display)">Plan active</b>
-        <div style="font-size:10px;color:#9AA4BC;margin-top:4px">Base Pack, Sports Plus and Regional on your set-top box</div></div>`;
+        <div style="font-size:10px;color:#B9A097;margin-top:4px">Base Pack, Sports Plus and Regional on your set-top box</div></div>`;
     }, 6900);
     t.later(() => demos.tvmax(a, t), 9800);
-  };
-
-  /* ---------- Vine Gypsy ---------- */
-  demos.vine = (a) => {
-    const rooms = [
-      ["Hillcrest Cellars", "Napa Valley", 4.8, "$$", ["Food", "Great service"]],
-      ["Old Vine Estate", "Barossa", 4.6, "$", ["Great wine"]],
-      ["Maison Ardoise", "Burgundy", 4.9, "$$$", ["Great wine", "Food"]],
-      ["Riverbend Tasting Room", "Willamette", 4.4, "$", ["Great service"]],
-      ["Casa Alta", "Mendoza", 4.7, "$$", ["Food", "Great wine"]]
-    ];
-    const filters = ["Great wine", "Food", "Great service", "$"];
-    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:#FBF8F5">
-      ${sb()}
-      <div class="pad" style="padding-top:4px"><b style="font:700 16px var(--display);color:#5A1E33">Tasting rooms</b>
-        <div class="searchbar" style="margin-top:10px">Search a region or winery</div>
-        <div class="vf row" style="gap:6px;margin:10px 0 2px;flex-wrap:wrap">
-          ${filters.map(f => `<button data-f="${f}" aria-pressed="false" style="border:1px solid #E5D6DC;background:#fff;color:#5A1E33;border-radius:999px;padding:5px 10px;font:600 10px var(--body);cursor:pointer">${f}</button>`).join("")}
-        </div>
-      </div>
-      <div class="vl pad" style="flex:1;overflow-y:auto;scrollbar-width:none;padding-bottom:14px"></div>
-    </div>`;
-    const active = new Set();
-    const list = a.querySelector(".vl");
-    const render = () => {
-      const hits = rooms.filter(r => [...active].every(f => f === "$" ? r[3] === "$" : r[4].includes(f)));
-      list.innerHTML = hits.length ? hits.map(r => `
-        <div style="background:#fff;border-radius:14px;margin-top:10px;overflow:hidden;border:1px solid #F0E6EA">
-          <div style="height:54px;background:linear-gradient(120deg,#7A2E48,#B8577A)"></div>
-          <div style="padding:9px 11px">
-            <div class="row" style="justify-content:space-between"><b style="font-size:11.5px">${r[0]}</b><b style="font-size:11px;color:#7A2E48">★ ${r[2]}</b></div>
-            <div class="ui-sub">${r[1]}, ${r[3]}</div>
-            <div class="row" style="gap:4px;margin-top:6px">${r[4].map(x => `<span style="font-size:8.5px;background:#F7EEF1;color:#7A2E48;border-radius:6px;padding:2px 6px">${x}</span>`).join("")}</div>
-          </div>
-        </div>`).join("") : `<div style="text-align:center;padding:30px 0" class="ui-sub">No rooms match all filters. Remove one to see more.</div>`;
-    };
-    a.querySelectorAll(".vf button").forEach(btn => btn.addEventListener("click", () => {
-      const f = btn.dataset.f; active.has(f) ? active.delete(f) : active.add(f);
-      const on = active.has(f);
-      btn.setAttribute("aria-pressed", on);
-      btn.style.background = on ? "#7A2E48" : "#fff"; btn.style.color = on ? "#fff" : "#5A1E33";
-      render();
-    }));
-    render();
-  };
-
-  /* ---------- Vine Gypsy: shared bits ---------- */
-  const WINE = "#7A2E48", WINE_D = "#5A1E33", WINE_L = "#F7EEF1";
-  const vineHead = (title, back = true) => `${sb()}<div class="row pad" style="padding-bottom:10px">
-      ${back ? `<span style="font-size:16px;color:${WINE_D}">‹</span>` : ""}<b style="font:700 15px var(--display);color:${WINE_D}">${title}</b></div>`;
-  const stars = (n, size = 15) => `<span class="row" style="gap:2px">${[1, 2, 3, 4, 5].map(i => `<span class="st" data-v="${i}" style="font-size:${size}px;color:${i <= n ? "#D9A21B" : "#E5D6DC"};transition:color .2s">★</span>`).join("")}</span>`;
-
-  /* ---------- Vine Gypsy: guided review ---------- */
-  demos.vineReview = (a, t) => {
-    const qs = ["Wine quality", "Value for price", "Food offering", "Service"];
-    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:#FBF8F5;position:relative">
-      ${vineHead("Review Hillcrest Cellars")}
-      <div class="pad">
-        <div class="row" style="gap:4px">${[0, 1, 2].map(i => `<span class="stp" style="flex:1;height:5px;border-radius:3px;background:${i ? "#EADCE1" : WINE};transition:background .3s"></span>`).join("")}</div>
-        <div class="ui-sub" style="margin-top:6px">About the tasting room</div>
-      </div>
-      <div class="rv pad" style="flex:1;padding-top:6px">
-        ${qs.map((q, i) => `<div class="q" style="background:#fff;border:1px solid #F0E6EA;border-radius:12px;padding:10px 12px;margin-top:8px">
-          <div style="font-weight:600;font-size:11px;margin-bottom:6px">${q}</div>${stars(0, 17)}</div>`).join("")}
-      </div>
-      <div class="pad" style="padding-bottom:22px"><div class="vbtn" style="background:${WINE};color:#fff;border-radius:12px;text-align:center;padding:11px;font-weight:600">Next</div></div>
-      <div class="done" style="position:absolute;inset:0;background:#FBF8F5;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;padding:24px;text-align:center">
-        ${tickIcon(WINE, 56)}<b style="margin-top:14px;font:700 15px var(--display);color:${WINE_D}">Thanks for your review</b>
-        <div class="ui-sub" style="margin-top:4px">Your followers will be notified</div>
-      </div>
-    </div>`;
-    const qEls = a.querySelectorAll(".q"), steps = a.querySelectorAll(".stp");
-    const rate = (qi, v) => qEls[qi].querySelectorAll(".st").forEach((s, k) => s.style.color = k < v ? "#D9A21B" : "#E5D6DC");
-    qEls.forEach((q, qi) => q.querySelectorAll(".st").forEach(s => { s.style.cursor = "pointer"; s.addEventListener("click", () => rate(qi, +s.dataset.v)); }));
-    if (reduced) { [5, 4, 3, 5].forEach((v, i) => rate(i, v)); return; }
-    [5, 4, 3, 5].forEach((v, i) => t.later(() => rate(i, v), 900 + i * 700));
-    t.later(() => {
-      steps[1].style.background = WINE;
-      a.querySelector(".ui-sub").textContent = "Photos and comment";
-      a.querySelector(".rv").innerHTML = `
-        <div class="row" style="gap:8px;margin-top:8px">
-          ${["#B8577A", "#7A2E48", "#D9A21B"].map(c => `<span style="width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,${c},#F0E6EA)"></span>`).join("")}
-          <span style="width:64px;height:64px;border-radius:12px;border:1.5px dashed #D8C3CB;display:grid;place-items:center;color:${WINE};font-size:20px">+</span>
-        </div>
-        <div class="ui-sub" style="margin-top:6px">Compressed on your phone before upload</div>
-        <div class="cm" style="background:#fff;border:1px solid #F0E6EA;border-radius:12px;padding:10px 12px;margin-top:12px;min-height:80px;font-size:11px;line-height:1.5"></div>`;
-      const cm = a.querySelector(".cm"), txt = "Lovely Cabernet flight and a shaded patio. Book ahead on weekends.";
-      let k = 0; t.every(() => { if (k <= txt.length) cm.textContent = txt.slice(0, k++); }, 35);
-    }, 4000);
-    t.later(() => { steps[2].style.background = WINE; a.querySelector(".vbtn").textContent = "Submit review"; }, 6800);
-    t.later(() => { const d = a.querySelector(".done"); d.style.opacity = 1; }, 7600);
-    t.later(() => demos.vineReview(a, t), 10200);
-  };
-
-  /* ---------- Vine Gypsy: community ---------- */
-  demos.vineCommunity = (a, t) => {
-    const ppl = [["Sofia Marchetti", "Certified sommelier", 142], ["James Okafor", "Wine educator", 97], ["Lena Brandt", "Enthusiast", 64], ["Arjun Mehta", "Enthusiast", 51]];
-    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:#FBF8F5;position:relative">
-      ${vineHead("Top reviewers", false)}
-      <div class="pad" style="flex:1">
-        ${ppl.map((p, i) => `<div class="row" style="background:#fff;border:1px solid #F0E6EA;border-radius:12px;padding:9px 10px;margin-top:8px">
-          <span class="circle" style="width:32px;height:32px;background:${["#B8577A", "#7A2E48", "#D9A21B", "#8A93A6"][i]};flex:none"></span>
-          <div style="flex:1;min-width:0"><b style="font-size:11px">${p[0]}</b>${i < 2 ? `<span title="Certified" style="color:${WINE};margin-left:4px">✓</span>` : ""}
-            <div class="ui-sub">${p[1]}, ${p[2]} reviews</div></div>
-          <button class="fl" data-on="${i === 0}" style="border:1px solid ${WINE};border-radius:999px;padding:4px 10px;font:600 9.5px var(--body);cursor:pointer;
-            background:${i === 0 ? WINE : "#fff"};color:${i === 0 ? "#fff" : WINE}">${i === 0 ? "Following" : "Follow"}</button>
-        </div>`).join("")}
-      </div>
-      <div class="notes" style="position:absolute;left:10px;right:10px;top:46px;z-index:5;display:flex;flex-direction:column;gap:6px"></div>
-    </div>`;
-    a.querySelectorAll(".fl").forEach(b => b.addEventListener("click", () => {
-      const on = b.dataset.on !== "true"; b.dataset.on = on;
-      b.textContent = on ? "Following" : "Follow"; b.style.background = on ? WINE : "#fff"; b.style.color = on ? "#fff" : WINE;
-    }));
-    if (reduced) return;
-    const box = a.querySelector(".notes");
-    const msgs = [
-      ["Sofia Marchetti reviewed Maison Ardoise", "★ 4.9, \"Exceptional Chardonnay\""],
-      ["James Okafor started following you", "Tap to see his profile"],
-      ["Sofia Marchetti visited Casa Alta", "Mendoza, Argentina"]
-    ];
-    msgs.forEach((m, i) => t.later(() => {
-      const el = document.createElement("div");
-      el.style.cssText = "background:#fff;border-radius:14px;padding:9px 11px;display:flex;gap:9px;align-items:center;box-shadow:0 10px 24px -10px rgba(26,34,56,.45);opacity:0;transform:translateY(-12px);transition:all .35s cubic-bezier(.2,.8,.2,1)";
-      el.innerHTML = `<span style="width:22px;height:22px;border-radius:6px;background:${WINE};flex:none"></span>
-        <div style="min-width:0"><b style="font-size:10.5px;display:block">${m[0]}</b><span class="ui-sub" style="font-size:9.5px">${m[1]}</span></div>`;
-      box.prepend(el);
-      requestAnimationFrame(() => { el.style.opacity = 1; el.style.transform = "none"; });
-      t.later(() => { el.style.opacity = 0; el.style.transform = "translateY(-12px)"; t.later(() => el.remove(), 360); }, 2600);
-    }, 900 + i * 2400));
-    t.later(() => demos.vineCommunity(a, t), 9000);
-  };
-
-  /* ---------- Vine Gypsy: tasting-room page for owners ---------- */
-  demos.vineRoom = (a) => {
-    const tabs = {
-      Wines: [["2021 Estate Cabernet", "Red, $42"], ["2022 Reserve Chardonnay", "White, $36"], ["Sparkling Rosé", "Sparkling, $30"]],
-      Events: [["Harvest weekend", "Sat 14 Sep, 11am"], ["Blending workshop", "Thu 26 Sep, 5pm"], ["Live jazz on the patio", "Fri 4 Oct, 6pm"]],
-      Hours: [["Mon to Thu", "11am to 5pm"], ["Fri and Sat", "10am to 7pm"], ["Sunday", "Closed"]]
-    };
-    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:#FBF8F5">
-      <div style="height:150px;background:linear-gradient(140deg,${WINE_D},#B8577A);position:relative;color:#fff">
-        ${sb(true)}
-        <div style="position:absolute;left:14px;bottom:12px"><b style="font:700 16px var(--display)">Hillcrest Cellars</b><div style="font-size:10px;opacity:.85">Napa Valley, ★ 4.8</div></div>
-        <span style="position:absolute;right:12px;bottom:14px;font-size:9.5px;font-weight:600;background:#D7F2EA;color:#1E6E60;border-radius:999px;padding:3px 8px">Claimed by you</span>
-      </div>
-      <div class="pad row vt" role="tablist" style="gap:6px;padding-top:12px">
-        ${Object.keys(tabs).map((k, i) => `<button role="tab" data-k="${k}" aria-selected="${!i}" style="border:0;border-radius:999px;padding:6px 12px;font:600 10.5px var(--body);cursor:pointer;
-          background:${i ? WINE_L : WINE};color:${i ? WINE : "#fff"}">${k}</button>`).join("")}
-      </div>
-      <div class="vlist pad" style="flex:1;padding-top:4px"></div>
-      <div class="pad" style="padding-bottom:22px"><div style="border:1.5px dashed #D8C3CB;color:${WINE};border-radius:12px;text-align:center;padding:10px;font-weight:600" class="vadd">Add a wine</div></div>
-    </div>`;
-    const list = a.querySelector(".vlist"), add = a.querySelector(".vadd"), btns = a.querySelectorAll(".vt button");
-    const show = (k) => {
-      btns.forEach(b => { const on = b.dataset.k === k; b.setAttribute("aria-selected", on); b.style.background = on ? WINE : WINE_L; b.style.color = on ? "#fff" : WINE; });
-      list.innerHTML = tabs[k].map(([h, s]) => `<div class="row" style="background:#fff;border:1px solid #F0E6EA;border-radius:12px;padding:10px 12px;margin-top:8px;justify-content:space-between">
-        <div><b style="font-size:11px">${h}</b><div class="ui-sub">${s}</div></div><span style="color:${WINE};font-size:10px;font-weight:600">Edit</span></div>`).join("");
-      add.textContent = k === "Wines" ? "Add a wine" : k === "Events" ? "Add an event" : "Edit opening hours";
-    };
-    btns.forEach(b => b.addEventListener("click", () => show(b.dataset.k)));
-    show("Wines");
-  };
-
-  /* ---------- Finsco ---------- */
-  const FIN = "#1F6FEB", FIN_UP = "#16A06A", FIN_DN = "#D64545", FIN_BG = "#0F1524", FIN_CARD = "#182036";
-  const finSeries = (n, seed, drift) => {
-    let v = 50, out = [];
-    for (let i = 0; i < n; i++) { seed = (seed * 9301 + 49297) % 233280; v += (seed / 233280 - .5) * 9 + drift; out.push(v); }
-    return out;
-  };
-  const linePath = (pts, w, h) => {
-    const mn = Math.min(...pts), mx = Math.max(...pts);
-    return pts.map((p, i) => `${i ? "L" : "M"}${(i / (pts.length - 1) * w).toFixed(1)},${(h - (p - mn) / (mx - mn || 1) * (h - 8) - 4).toFixed(1)}`).join("");
-  };
-
-  demos.finPortfolio = (a) => {
-    const ranges = { "1D": [24, 7, .25, "+$412.80", "+0.9%"], "1W": [30, 3, .5, "+$1,284.10", "+2.8%"], "1M": [40, 11, -.05, "−$356.40", "−0.8%"], "1Y": [52, 5, .9, "+$8,940.55", "+23.6%"] };
-    const hold = [["AAPL", "Apple", "$12,480", "+1.2%"], ["BTC", "Bitcoin", "$9,215", "+3.4%"], ["VOO", "Vanguard S&P 500", "$15,602", "+0.6%"], ["TSLA", "Tesla", "$4,330", "−2.1%"]];
-    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:${FIN_BG};color:#fff">
-      ${sb(true)}
-      <div class="pad"><div style="font-size:10px;color:#93A0BD">Portfolio value</div>
-        <b style="font:800 26px var(--display)">$41,627.30</b>
-        <div class="chg" style="font-size:11px;font-weight:600;margin-top:2px"></div></div>
-      <div style="padding:10px 0 0;position:relative">
-        <svg class="ch" viewBox="0 0 256 110" width="100%" height="110" preserveAspectRatio="none" style="display:block">
-          <path class="area" d="" fill="url(#g1)" opacity=".35"/><path class="ln" d="" fill="none" stroke-width="2" stroke-linejoin="round"/>
-          <defs><linearGradient id="g1" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#16A06A"/><stop offset="1" stop-color="#16A06A" stop-opacity="0"/></linearGradient></defs>
-        </svg>
-      </div>
-      <div class="pad row rg" role="tablist" style="justify-content:space-between;margin:8px 0 12px">
-        ${Object.keys(ranges).map((k, i) => `<button role="tab" data-k="${k}" aria-selected="${i === 3}" style="border:0;border-radius:8px;padding:5px 12px;font:600 10.5px var(--body);cursor:pointer;background:${i === 3 ? FIN_CARD : "transparent"};color:${i === 3 ? "#fff" : "#93A0BD"}">${k}</button>`).join("")}
-      </div>
-      <div class="pad" style="flex:1">
-        <div class="row" style="justify-content:space-between;margin-bottom:6px"><b style="font-size:12px">Holdings</b><span style="font-size:10px;color:#93A0BD">Linked with Plaid</span></div>
-        ${hold.map(h => `<div class="row" style="padding:9px 0;border-bottom:1px solid #222B44">
-          <span style="width:30px;height:30px;border-radius:9px;background:${FIN_CARD};display:grid;place-items:center;font-size:8.5px;font-weight:700">${h[0]}</span>
-          <div style="flex:1"><b style="font-size:11px">${h[0]}</b><div style="font-size:9.5px;color:#93A0BD">${h[1]}</div></div>
-          <div style="text-align:right"><b style="font-size:11px">${h[2]}</b><div style="font-size:9.5px;color:${h[3][0] === "−" ? FIN_DN : FIN_UP}">${h[3]}</div></div></div>`).join("")}
-      </div>
-    </div>`;
-    const ln = a.querySelector(".ln"), ar = a.querySelector(".area"), chg = a.querySelector(".chg"), stop = a.querySelectorAll("stop");
-    const show = (k) => {
-      const [n, seed, drift, d, pct] = ranges[k];
-      const up = d[0] === "+", col = up ? FIN_UP : FIN_DN;
-      const path = linePath(finSeries(n, seed, drift), 256, 110);
-      ln.setAttribute("d", path); ln.setAttribute("stroke", col);
-      ar.setAttribute("d", path + "L256,110L0,110Z");
-      stop.forEach(s => s.setAttribute("stop-color", col));
-      chg.textContent = `${d} (${pct}) ${k === "1D" ? "today" : "this " + { "1W": "week", "1M": "month", "1Y": "year" }[k]}`;
-      chg.style.color = col;
-      a.querySelectorAll(".rg button").forEach(b => { const on = b.dataset.k === k; b.setAttribute("aria-selected", on); b.style.background = on ? FIN_CARD : "transparent"; b.style.color = on ? "#fff" : "#93A0BD"; });
-      if (!reduced) {
-        const L = ln.getTotalLength ? ln.getTotalLength() : 600;
-        ln.style.transition = "none"; ln.style.strokeDasharray = L; ln.style.strokeDashoffset = L;
-        void ln.getBoundingClientRect();
-        ln.style.transition = "stroke-dashoffset .9s ease-out"; ln.style.strokeDashoffset = 0;
-      }
-    };
-    a.querySelectorAll(".rg button").forEach(b => b.addEventListener("click", () => show(b.dataset.k)));
-    show("1Y");
-  };
-
-  demos.finResearch = (a, t) => {
-    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:${FIN_BG};color:#fff;position:relative">
-      ${sb(true)}
-      <div class="pad row" style="justify-content:space-between;padding-bottom:8px">
-        <span style="color:#93A0BD;font-size:16px">‹</span>
-        <button class="star" aria-pressed="false" aria-label="Add to watchlist" style="border:0;background:transparent;font-size:18px;cursor:pointer;color:#93A0BD;transition:transform .2s">☆</button>
-      </div>
-      <div class="pad"><div class="row" style="gap:10px"><span style="width:38px;height:38px;border-radius:11px;background:${FIN_CARD};display:grid;place-items:center;font-weight:700;font-size:10px">MSFT</span>
-        <div><b style="font:700 15px var(--display)">Microsoft</b><div style="font-size:10px;color:#93A0BD">NASDAQ: MSFT</div></div></div></div>
-      <div class="pad" style="margin-top:14px">
-        <div style="background:${FIN_CARD};border-radius:16px;padding:14px;display:flex;gap:14px;align-items:center">
-          <svg width="76" height="76" viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="38" r="31" fill="none" stroke="#222B44" stroke-width="8"/>
-            <circle class="gauge" cx="38" cy="38" r="31" fill="none" stroke="${FIN_UP}" stroke-width="8" stroke-linecap="round" transform="rotate(-90 38 38)" stroke-dasharray="194.8" stroke-dashoffset="194.8" style="transition:stroke-dashoffset 1.2s ease-out"/>
-            <text class="gnum" x="38" y="44" text-anchor="middle" fill="#fff" style="font:800 19px var(--display)">0</text></svg>
-          <div><div style="font-size:10px;color:#93A0BD">Finsco score</div><b style="font-size:13px">Strong</b><div style="font-size:9.5px;color:#93A0BD;margin-top:2px">Better than 86% of large caps</div></div>
-        </div>
-        <div style="margin-top:12px;font-size:11px;font-weight:700">Key data</div>
-        ${[["Price", "$418.52"], ["P/E ratio", "35.4"], ["Dividend yield", "0.72%"], ["52-week range", "$309 to $468"]].map(([k, v]) => `<div class="row" style="justify-content:space-between;padding:8px 0;border-bottom:1px solid #222B44"><span style="color:#93A0BD;font-size:10.5px">${k}</span><b style="font-size:10.5px">${v}</b></div>`).join("")}
-      </div>
-      <div class="wt" style="position:absolute;left:12px;right:12px;bottom:18px;background:#fff;color:var(--ink);border-radius:12px;padding:10px 12px;font-size:10.5px;opacity:0;transform:translateY(10px);transition:all .3s">Added Microsoft to your watchlist</div>
-    </div>`;
-    const g = a.querySelector(".gauge"), num = a.querySelector(".gnum"), star = a.querySelector(".star"), wt = a.querySelector(".wt");
-    const score = 82;
-    g.style.strokeDashoffset = 194.8 * (1 - score / 100);
-    if (reduced) num.textContent = score;
-    else { let v = 0; t.every(() => { if (v < score) num.textContent = ++v; }, 14); }
-    star.addEventListener("click", () => {
-      const on = star.getAttribute("aria-pressed") !== "true";
-      star.setAttribute("aria-pressed", on); star.textContent = on ? "★" : "☆"; star.style.color = on ? "#F2B705" : "#93A0BD";
-      star.style.transform = "scale(1.25)"; t.later(() => star.style.transform = "", 200);
-      wt.textContent = on ? "Added Microsoft to your watchlist" : "Removed from your watchlist";
-      wt.style.opacity = 1; wt.style.transform = "none";
-      t.later(() => { wt.style.opacity = 0; wt.style.transform = "translateY(10px)"; }, 1800);
-    });
-  };
-
-  demos.finCommunity = (a) => {
-    const posts = [
-      ["Priya N.", "2h", "Trimming my NVDA position after this run and moving some into VOO. Too much in one name.", 48, 12, ["#1F6FEB", "#16A06A"]],
-      ["Marcus L.", "5h", "ETH staking yields vs. dividend stocks: which do you hold for income?", 31, 22, null],
-      ["Aiko T.", "1d", "Finsco score on KO went up after earnings. Anyone adding?", 19, 7, null]
-    ];
-    a.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;background:${FIN_BG};color:#fff">
-      ${sb(true)}
-      <div class="pad row" style="justify-content:space-between;padding-bottom:8px"><b style="font:700 15px var(--display)">Ideas</b>
-        <span style="font-size:10px;background:${FIN};border-radius:999px;padding:5px 10px;font-weight:600">New post</span></div>
-      <div class="pad row" style="gap:6px;padding-bottom:8px">${["All", "Stocks", "Crypto", "Following"].map((x, i) => `<span style="font-size:10px;padding:4px 10px;border-radius:999px;background:${i ? FIN_CARD : "#fff"};color:${i ? "#C3CCE0" : FIN_BG};font-weight:600">${x}</span>`).join("")}</div>
-      <div class="pad" style="flex:1;overflow:hidden">
-        ${posts.map(([n, ago, txt, likes, cm, img], i) => `<div style="background:${FIN_CARD};border-radius:14px;padding:11px 12px;margin-top:8px">
-          <div class="row"><span class="circle" style="width:24px;height:24px;background:${["#8E6CEF", "#E08A3C", "#3CB4E0"][i]}"></span><b style="font-size:10.5px">${n}</b><span style="font-size:9.5px;color:#93A0BD">${ago}</span></div>
-          <div style="font-size:10.5px;line-height:1.45;margin-top:7px;color:#DDE3F0">${txt}</div>
-          ${img ? `<div style="height:58px;border-radius:10px;margin-top:8px;background:linear-gradient(120deg,${img[0]},${img[1]});opacity:.85"></div>` : ""}
-          <div class="row" style="gap:16px;margin-top:8px;font-size:10px;color:#93A0BD">
-            <button class="lk" data-n="${likes}" aria-pressed="false" style="border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;padding:0;display:flex;gap:4px;align-items:center"><span class="h" style="font-size:13px;transition:transform .2s">♡</span><span class="c">${likes}</span></button>
-            <span>💬 ${cm}</span><span>Share</span></div>
-        </div>`).join("")}
-      </div>
-    </div>`;
-    a.querySelectorAll(".lk").forEach(b => b.addEventListener("click", () => {
-      const on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", on);
-      const h = b.querySelector(".h"); h.textContent = on ? "♥" : "♡"; h.style.color = on ? "#F05D7A" : ""; h.style.transform = on ? "scale(1.3)" : "";
-      setTimeout(() => h.style.transform = "", 200);
-      b.querySelector(".c").textContent = +b.dataset.n + (on ? 1 : 0);
-    }));
   };
 
   /* ================= explorer component ================= */
@@ -822,6 +535,7 @@
         </div>` : ""}
         <div class="feat">
           <div class="feat-visual">
+            <div class="shots" hidden></div>
             <div class="phones">
               <figure class="device dev-before" hidden><figcaption><span class="tag tag-before">Before</span></figcaption>
                 <div class="phone"><div class="island"></div><div class="screen sc-before"></div></div></figure>
@@ -837,6 +551,10 @@
               <ul class="feat-built"></ul>
             </div>
             <div class="feat-actions">
+              <div class="seg mode" role="group" aria-label="What to show" hidden>
+                <button type="button" data-m="screens" aria-pressed="true">Real screens</button>
+                <button type="button" data-m="demo" aria-pressed="false">Try it</button>
+              </div>
               <p class="feat-hint"></p>
               <button type="button" class="ghost cmp" aria-pressed="false">Compare with before</button>
             </div>
@@ -852,12 +570,16 @@
         this.show(n); this.tabs[n].focus();
       });
       this.cmp = this.root.querySelector(".cmp");
-      this.cmp.addEventListener("click", () => { this.compare = !this.compare; this.show(this.i); });
+      this.cmp.addEventListener("click", () => { this.compare = !this.compare; this.show(this.i, true); });
+      this.root.querySelectorAll(".mode button").forEach(b => b.addEventListener("click", () => { this.mode = b.dataset.m; this.show(this.i, true); }));
     }
-    show(k) {
+    show(k, keepMode) {
       this.stop();
+      if (!keepMode && k !== this.i) this.mode = null;
       this.i = k;
       const f = this.p.features[k];
+      const hasShots = !!(f.shots && f.shots.length), hasDemo = !!(f.demo && demos[f.demo]);
+      if (!this.mode || (this.mode === "screens" && !hasShots) || (this.mode === "demo" && !hasDemo)) this.mode = hasShots ? "screens" : "demo";
       this.tabs.forEach((b, j) => {
         b.setAttribute("aria-selected", j === k);
         b.tabIndex = j === k ? 0 : -1;
@@ -869,7 +591,22 @@
       const ul = r.querySelector(".feat-built");
       ul.innerHTML = f.built.map(x => `<li>${esc(x)}</li>`).join("");
       r.querySelector(".feat-built-wrap").hidden = !f.built.length;
-      r.querySelector(".feat-hint").textContent = f.hint || "";
+      const demoMode = this.mode === "demo";
+      r.querySelector(".feat-hint").textContent = demoMode || !hasDemo ? (demoMode ? f.hint || "" : "") : "";
+      const modeEl = r.querySelector(".mode");
+      modeEl.hidden = !(hasShots && hasDemo);
+      modeEl.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === this.mode));
+      const shotsEl = r.querySelector(".shots");
+      shotsEl.hidden = demoMode;
+      r.querySelector(".phones").hidden = !demoMode;
+      if (!demoMode) {
+        shotsEl.innerHTML = f.shots.map((src, j) => `<figure class="shot"><img src="${esc(src)}" alt="${esc((f.shotAlts || [])[j] || f.title)}" loading="lazy" decoding="async"></figure>`).join("");
+        this.compare = false;
+        this.cmp.hidden = true;
+        r.querySelector(".feat").classList.remove("comparing");
+        r.querySelector(".sc-after").innerHTML = "";
+        return;
+      }
       const hasBefore = !!f.before && !!befores[f.before];
       if (!hasBefore) this.compare = false;
       this.cmp.hidden = !hasBefore;
@@ -910,9 +647,17 @@
         <div>
           <p class="p-summary">${esc(p.summary)}</p>
           <ul class="chips" aria-label="Tools">${p.stack.map(s => `<li>${esc(s)}</li>`).join("")}</ul>
+          ${p.links ? `<p class="store-links">${p.links.map(l => `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join("")}</p>` : ""}
         </div>
       </div>
       <div class="explorer"></div>
+      ${p.gallery ? `
+        <div class="gallery">
+          <h3>${esc(p.gallery.title)}</h3>
+          <div class="strip" tabindex="0" aria-label="${esc(p.name)} screenshots, scrolls sideways">
+            ${p.gallery.images.map((src, j) => `<img src="${esc(src)}" alt="${esc(p.name)} screenshot ${j + 1}" loading="lazy" decoding="async">`).join("")}
+          </div>
+        </div>` : ""}
       ${p.underTheHood ? `
         <div class="uth">
           <h3>${esc(p.underTheHood.title)}</h3>

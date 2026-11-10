@@ -14,6 +14,11 @@ window.PORTFOLIO = {
       color: "var(--area-messenger)",
       summary: "Innopay is a payments app for India: bills, mobile recharges, bus tickets and digital gold, paid by UPI. I joined in 2025 and have built its Messenger, a large part of the home screen and much of the payment flow.",
       stack: ["Flutter", "GetX", "WebSockets", "SQLite", "Firebase", "Kotlin & Swift channels"],
+      links: [
+        { label: "App Store", href: "https://apps.apple.com/in/app/innopay-recharge-bills/id6467755491" },
+        { label: "Google Play", href: "https://play.google.com/store/apps/details?id=com.innopay.payment.user" }
+      ],
+      gallery: { title: "From the store listing", images: [0, 1, 2, 3, 4, 5, 6, 7].map(i => `assets/img/innopay/store-${i}.webp`) },
       features: [
         {
           id: "messenger",
@@ -151,11 +156,16 @@ window.PORTFOLIO = {
       id: "tvmax",
       name: "TVMAX",
       kind: "IPTV subscriber app",
-      company: "Innopay (client project)",
+      company: "Innopay, for Innolens Media",
       period: "2026",
       color: "var(--area-app)",
       summary: "TVMAX subscribers use this app to manage their channel packs and set-top boxes, and to pay for them. I started the app and wrote most of it.",
       stack: ["Flutter", "Riverpod", "go_router", "Dio", "UPI intents", "Firebase"],
+      links: [
+        { label: "App Store", href: "https://apps.apple.com/in/app/tvmax-customer-app/id6772130411" },
+        { label: "Google Play", href: "https://play.google.com/store/apps/details?id=com.tvmax.customer" }
+      ],
+      gallery: { title: "From the store listing", images: [0, 1, 2, 3, 4].map(i => `assets/img/tvmax/store-${i}.webp`) },
       features: [
         {
           id: "tvmax",
@@ -170,8 +180,10 @@ window.PORTFOLIO = {
             "Push notifications that open the related transaction, with refunds shown clearly",
             "OTP login with autofill, secure storage and Crashlytics"
           ],
+          shots: ["assets/img/tvmax/home.webp", "assets/img/tvmax/channels.webp"],
+          shotAlts: ["TVMAX home with the set-top box and channel categories", "TVMAX channel list with search and category filters"],
           demo: "tvmax",
-          hint: "The phone runs a full purchase."
+          hint: "Try it runs a full purchase."
         }
       ]
     },
@@ -185,6 +197,11 @@ window.PORTFOLIO = {
       color: "var(--area-payments)",
       summary: "Vine Gypsy helps people find wine tasting rooms worth visiting, with reviews from certified wine professionals and other visitors. I was its only developer: I built the app from the first commit to its App Store and Play Store launch in 2024, then added tablet and web versions.",
       stack: ["Flutter", "Firebase", "Cloud Functions", "Google Maps", "Riverpod", "go_router"],
+      links: [
+        { label: "App Store", href: "https://apps.apple.com/in/app/vine-gypsy/id6478381545" },
+        { label: "Google Play", href: "https://play.google.com/store/apps/details?id=com.vinegypsy.app" }
+      ],
+      gallery: { title: "From the store listing", images: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => `assets/img/vinegypsy/store-${i}.webp`) },
       features: [
         {
           id: "vine-discover",
@@ -197,8 +214,8 @@ window.PORTFOLIO = {
             "Search by name or address with Google Places",
             "Paginated lists with cached images, after I tracked down an image-cache memory leak"
           ],
-          demo: "vine",
-          hint: "Tap the filters."
+          shots: ["assets/img/vinegypsy/map.webp", "assets/img/vinegypsy/room.webp"],
+          shotAlts: ["Map of tasting rooms with Food, Price and Rating filters","A tasting room page with photos"]
         },
         {
           id: "vine-review",
@@ -211,8 +228,8 @@ window.PORTFOLIO = {
             "Certified wine professionals upload a certificate; admins get an approval email",
             "Reviews can be edited later, and ratings roll up into each room's score"
           ],
-          demo: "vineReview",
-          hint: "The phone fills in a review."
+          shots: ["assets/img/vinegypsy/room-reviews.webp", "assets/img/vinegypsy/my-reviews.webp"],
+          shotAlts: ["Reviews on a tasting room, with certified reviewers","Your reviews, with scores for each question"]
         },
         {
           id: "vine-community",
@@ -225,8 +242,8 @@ window.PORTFOLIO = {
             "Profile links you can share that open in the app on Android, iOS and the web",
             "Notifications sent by Firebase Cloud Functions when someone you follow reviews, visits or follows you"
           ],
-          demo: "vineCommunity",
-          hint: "New notifications arrive on their own."
+          shots: ["assets/img/vinegypsy/users.webp", "assets/img/vinegypsy/profile.webp"],
+          shotAlts: ["All users with follow buttons and review counts","A profile with followers, following, visits and reviews"]
         },
         {
           id: "vine-owner",
@@ -239,8 +256,8 @@ window.PORTFOLIO = {
             "Tasting notes for each wine, grouped by visit",
             "Wishlist, favourites, visited and membership lists, plus designated-driver tours"
           ],
-          demo: "vineRoom",
-          hint: "Switch between Wines, Events and Hours."
+          shots: ["assets/img/vinegypsy/add-room.webp", "assets/img/vinegypsy/favourites.webp"],
+          shotAlts: ["Add your tasting room","Favourites with average ratings"]
         }
       ],
       underTheHood: {
@@ -260,8 +277,9 @@ window.PORTFOLIO = {
       company: "Zemusi",
       period: "2022 to 2023",
       color: "var(--area-messenger)",
-      summary: "Finsco (first called Rumo) lets investors follow stocks, crypto and ETFs in one place, with a score and report for each holding and a community for trading ideas. I was the app's main developer, writing most of its screens and integrations.",
+      summary: "Finsco (first called Rumo) lets investors follow stocks, crypto and ETFs in one place, with a score and report for each holding, curated picks and a community feed. I was the app's main developer, writing most of its screens and integrations.",
       stack: ["Flutter", "Provider", "Plaid", "Firebase", "RevenueCat", "fl_chart"],
+      gallery: { title: "More screens", images: ["start", "portfolio-score", "ideas-stocks", "ideas-crypto", "stock-holdings", "ticker-details", "resources"].map(n => `assets/img/finsco/${n}.webp`) },
       features: [
         {
           id: "fin-portfolio",
@@ -274,8 +292,8 @@ window.PORTFOLIO = {
             "Portfolio valuation, holdings and allocation, calculated in the background",
             "Performance charts that redraw for each time range"
           ],
-          demo: "finPortfolio",
-          hint: "Switch the time range above the chart."
+          shots: ["assets/img/finsco/portfolio-graph.webp", "assets/img/finsco/crypto-holdings.webp"],
+          shotAlts: ["Portfolio value with a performance line graph","Crypto and ETF holdings with asset allocation"]
         },
         {
           id: "fin-research",
@@ -286,24 +304,24 @@ window.PORTFOLIO = {
             "Score and report screens for stocks, crypto and ETFs, driven by live ticker data",
             "Watchlists you can add to from any report",
             "Ticker search with suggestions as you type",
-            "Curated stock and crypto picks, news and a resource center"
+            "Curated stock and crypto picks with scores, news and a resource center"
           ],
-          demo: "finResearch",
-          hint: "Tap the star to watch this ticker."
+          shots: ["assets/img/finsco/ticker-score.webp", "assets/img/finsco/watchlist.webp"],
+          shotAlts: ["Alphabet report with price chart and a Finscore of 84","A watchlist with scores and price changes"]
         },
         {
           id: "fin-community",
-          title: "Ideas from other investors",
+          title: "Posts and alerts from the community",
           short: "Community",
-          what: "A feed where investors share ideas, comment, like and follow each other.",
+          what: "A feed where investors post, comment, like and follow each other, plus price alerts on the tickers they care about.",
           built: [
             "Posts with images, comments and likes, plus a create-post flow",
             "Community profiles with follow and follower lists",
-            "Filters for the ideas feed and community rules",
+            "Price alerts and a notifications screen, with community rules",
             "Push notifications that open the related post"
           ],
-          demo: "finCommunity",
-          hint: "Tap the heart."
+          shots: ["assets/img/finsco/feed.webp", "assets/img/finsco/alerts.webp"],
+          shotAlts: ["Home with a feed of community posts","Price alerts and notifications"]
         }
       ],
       underTheHood: {
