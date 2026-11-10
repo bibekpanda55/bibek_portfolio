@@ -279,7 +279,7 @@ window.PORTFOLIO = {
       color: "var(--area-messenger)",
       summary: "Finsco (first called Rumo) lets investors follow stocks, crypto and ETFs in one place, with a score and report for each holding, curated picks and a community feed. I was the app's main developer, writing most of its screens and integrations.",
       stack: ["Flutter", "Provider", "Plaid", "Firebase", "RevenueCat", "fl_chart"],
-      gallery: { title: "More screens", images: ["start", "portfolio-score", "ideas-stocks", "ideas-crypto", "stock-holdings", "ticker-details", "resources"].map(n => `assets/img/finsco/${n}.webp`) },
+      gallery: { title: "More screens", images: ["start", "portfolio-graph", "ideas-stocks", "ideas-crypto", "stock-holdings", "ticker-details", "resources"].map(n => `assets/img/finsco/${n}.webp`) },
       features: [
         {
           id: "fin-portfolio",
@@ -292,8 +292,8 @@ window.PORTFOLIO = {
             "Portfolio valuation, holdings and allocation, calculated in the background",
             "Performance charts that redraw for each time range"
           ],
-          shots: ["assets/img/finsco/portfolio-graph.webp", "assets/img/finsco/crypto-holdings.webp"],
-          shotAlts: ["Portfolio value with a performance line graph","Crypto and ETF holdings with asset allocation"]
+          shots: ["assets/img/finsco/portfolio-score.webp", "assets/img/finsco/crypto-holdings.webp"],
+          shotAlts: ["Robinhood portfolio worth $35,478.65 with a portfolio score of 82","Crypto and ETF holdings with asset allocation"]
         },
         {
           id: "fin-research",
