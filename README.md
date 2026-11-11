@@ -19,6 +19,6 @@ no real customer data.
 
 ## Adding images
 
-Put images in `assets/img/` as `.webp`, then run `python3 tools/img_sizes.py` so each image
+Put images in `assets/img/` as `.webp` (videos as `.mp4` with a `<name>-poster.webp` beside them), then run `python3 tools/img_sizes.py` so each one
 gets its real size on the page. Without it, the layout shifts while images load and Safari
 jumps while scrolling.

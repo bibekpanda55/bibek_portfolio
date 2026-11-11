@@ -76,6 +76,14 @@ window.PORTFOLIO = {
             "Staggered rows, uniform grids, configurable service tags and per-banner loading images",
             "Banner assets prefetched at launch, and the page refreshes after every payment"
           ],
+          shots: ["home-recording.mp4", "services.webp", "bill-payment-finance.webp", "finance-banner.webp", "others.webp"].map(n => `assets/img/innopay/home/${n}`),
+          shotAlts: [
+            "Screen recording of the home header cycling through campaign slides, with the search hint and centre button changing",
+            "Home with Popular services, a credit card bill reminder and the Recharge section",
+            "Bill Payment and Finance sections, with a New tag on Personal Loan",
+            "Finance cards above a promotional banner carousel",
+            "The Others grid with sixteen services"
+          ],
           demo: "carousel",
           before: "carousel",
           hint: "The header changes slides on its own."

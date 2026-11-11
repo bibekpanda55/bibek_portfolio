@@ -511,7 +511,12 @@
   const SIZES = window.IMG_SIZES || {};
   const img = (src, alt) => {
     const wh = SIZES[src];
-    return `<img src="${esc(src)}" alt="${esc(alt)}"${wh ? ` width="${wh[0]}" height="${wh[1]}"` : ""} loading="lazy" decoding="async">`;
+    const size = wh ? ` width="${wh[0]}" height="${wh[1]}"` : "";
+    if (/\.mp4$/.test(src)) {
+      const poster = src.replace(/\.mp4$/, "-poster.webp");
+      return `<video src="${esc(src)}" poster="${esc(poster)}"${size} muted loop playsinline preload="metadata" ${reduced ? "controls" : "autoplay"} aria-label="${esc(alt)}"></video>`;
+    }
+    return `<img src="${esc(src)}" alt="${esc(alt)}"${size} loading="lazy" decoding="async">`;
   };
 
   /* ================= explorer component ================= */
