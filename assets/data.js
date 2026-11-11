@@ -97,7 +97,15 @@ window.PORTFOLIO = {
             "A draggable sheet that snaps between 40% and full height based on how fast you swipe",
             "Search across all plans, with swipeable category tabs",
             "When nothing matches, the closest plans are suggested instead of an empty screen",
-            "Redesigned plan cards with validity and data at a glance"
+            "Redesigned plan cards with validity up front and long descriptions that expand",
+            "Recent recharges with one-tap Repeat Recharge, and a sheet to switch, edit or remove linked numbers"
+          ],
+          shots: ["plans-popular", "search-by-price", "repeat-recharge", "linked-numbers"].map(n => `assets/img/innopay/recharge/${n}.webp`),
+          shotAlts: [
+            "Airtel plans under the Popular tab, with an expanded plan description",
+            "Searching 220 shows the nearest plans across categories, each labelled with its category",
+            "Recent recharges with Repeat Recharge above the plan search",
+            "Linked numbers for a biller, with edit, delete and Link Another Account"
           ],
           demo: "plans",
           before: "plans",
