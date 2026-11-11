@@ -115,6 +115,9 @@ a { color: inherit; }
 .shot { margin: 0; width: 240px; flex: none; background: var(--ink); padding: 7px; border-radius: 34px;
   box-shadow: 0 0 0 1px #0d1222, 0 24px 40px -24px rgba(26,34,56,.55); }
 .shot img, .shot video { display: block; width: 100%; height: auto; border-radius: 28px; background: var(--sk); }
+.shot-scroll { aspect-ratio: 560 / 1218; overflow-y: auto; border-radius: 28px; scrollbar-width: none; background: var(--sk); }
+.shot-scroll::-webkit-scrollbar { display: none; }
+.shot-scroll img { border-radius: 0; }
 .shots.many { max-width: 498px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 12px; scrollbar-width: thin; }
 .shots.many .shot { scroll-snap-align: start; }
 .seg { display: inline-flex; background: var(--paper); border-radius: 10px; padding: 3px; }
@@ -214,6 +217,7 @@ a { color: inherit; }
   .shot { width: calc(50% - 5px); max-width: 240px; padding: 5px; border-radius: 24px; }
   .shots.many { max-width: none; justify-content: flex-start; }
   .shot img, .shot video { border-radius: 20px; }
+  .shot-scroll { border-radius: 20px; }
   .strip img { height: 280px; }
   .uth ul { grid-template-columns: 1fr; }
   .feat { padding: 16px; border-radius: 18px; }

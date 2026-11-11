@@ -610,7 +610,8 @@
       ul.innerHTML = f.built.map(x => `<li>${esc(x)}</li>`).join("");
       r.querySelector(".feat-built-wrap").hidden = !f.built.length;
       const demoMode = this.mode === "demo";
-      r.querySelector(".feat-hint").textContent = demoMode ? (f.hint || "") : (hasShots && f.shots.length > 2 ? "Scroll the screens sideways to see more." : "");
+      r.querySelector(".feat-hint").textContent = demoMode ? (f.hint || "")
+        : f.shotsHint || (hasShots && f.shots.length > 2 ? "Scroll the screens sideways to see more." : "");
       const modeEl = r.querySelector(".mode");
       modeEl.hidden = !(hasShots && hasDemo);
       modeEl.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === this.mode));
@@ -620,7 +621,12 @@
       shotsEl.scrollLeft = 0;
       r.querySelector(".phones").hidden = !demoMode;
       if (!demoMode) {
-        shotsEl.innerHTML = f.shots.map((src, j) => `<figure class="shot">${img(src, (f.shotAlts || [])[j] || f.title)}</figure>`).join("");
+        shotsEl.innerHTML = f.shots.map((sh, j) => {
+          const src = typeof sh === "string" ? sh : sh.src, alt = (f.shotAlts || [])[j] || f.title;
+          return sh.scroll
+            ? `<figure class="shot"><div class="shot-scroll" tabindex="0" aria-label="${esc(alt)}, scrolls">${img(src, alt)}</div></figure>`
+            : `<figure class="shot">${img(src, alt)}</figure>`;
+        }).join("");
         this.compare = false;
         this.cmp.hidden = true;
         r.querySelector(".feat").classList.remove("comparing");

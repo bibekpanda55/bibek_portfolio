@@ -118,10 +118,22 @@ window.PORTFOLIO = {
           what: "After paying, people see what they paid and a natural next step, instead of a dead end.",
           built: [
             "Rebuilt the confirmation screen with the receipt, top services and a Popular badge",
+            "Success and in-process states, cashback earned, and a details sheet with the full fee breakdown",
             "A rotating offer strip where only the text slides and the icon and dots stay put",
             "Ad and referral slots driven by configuration",
             "First-payment and payment-initiated analytics events"
           ],
+          shots: [
+            { src: "assets/img/innopay/receipt/success-full.webp", scroll: true },
+            "assets/img/innopay/receipt/details.webp",
+            "assets/img/innopay/receipt/in-process.webp"
+          ],
+          shotAlts: [
+            "The full payment success screen: amount, cashback earned, popular services, offer carousel and Done or Refer Friend",
+            "Payment details sheet with gross amount, fees, GST, Innopay Cash and the amount paid",
+            "Payment in-process state with popular services and an offer banner"
+          ],
+          shotsHint: "Scroll inside the first phone to see the whole receipt.",
           demo: "receipt",
           before: "receipt",
           hint: "Watch the offer strip."
