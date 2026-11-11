@@ -50,10 +50,17 @@ window.PORTFOLIO = {
           short: "Bills in chat",
           what: "Share an electricity or phone bill into a chat and the other person can pay it from the message itself.",
           built: [
-            "Bill cards in chat with a live Pay now button and a preview of the bill in the input bar",
-            "Before paying, the app re-checks the message so an edited or deleted bill can't be paid by mistake",
-            "Payment runs in the normal Innopay flow, then the card updates to show it's paid",
+            "Share any fetched bill from its biller page; it arrives in the chat as a card with a live Pay now button",
+            "Before paying, the app re-checks the message, and bills that were edited or deleted show as no longer valid",
+            "Pay now takes the friend straight into the normal Innopay checkout for that bill",
             "Messenger terms are checked before a first share, and people not yet on Messenger get an invite"
+          ],
+          shots: ["share-from-biller", "bill-in-chat", "expired-and-valid", "bill-history"].map(n => `assets/img/innopay/billshare/${n}.webp`),
+          shotAlts: [
+            "A fetched electricity bill on the biller page with a Share button",
+            "Bill cards in a chat: one sent, one received with Pay Now",
+            "Older shared bills marked as no longer valid, next to one that can still be paid",
+            "A chat history of bills shared over several weeks"
           ],
           demo: "billshare",
           hint: "Tap Pay now in the chat."
