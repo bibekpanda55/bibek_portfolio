@@ -32,6 +32,15 @@ window.PORTFOLIO = {
             "Swipe to reply, copy, delete for everyone, block, clear chat and contact-permission flows",
             "Status updates with view counts, promotional messages, and notifications that open the right chat"
           ],
+          shots: ["chats", "chat", "status", "chat-menu", "unknown-number", "search"].map(n => `assets/img/innopay/messenger/${n}.webp`),
+          shotAlts: [
+            "Messenger chat list with unread counts and a verified Innopay conversation",
+            "A conversation with photos, a date divider and the message input",
+            "An Innopay status update in full screen with progress bars",
+            "Chat menu with View profile, Clear chat and Block user",
+            "A chat from a number not in your contacts, with Block and Add options",
+            "Search across chats and contacts, with Invite for people not on Innopay"
+          ],
           demo: "messenger",
           hint: "The phone plays a swipe-to-reply."
         },

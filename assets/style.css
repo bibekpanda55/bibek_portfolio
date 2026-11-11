@@ -115,6 +115,8 @@ a { color: inherit; }
 .shot { margin: 0; width: 240px; flex: none; background: var(--ink); padding: 7px; border-radius: 34px;
   box-shadow: 0 0 0 1px #0d1222, 0 24px 40px -24px rgba(26,34,56,.55); }
 .shot img { display: block; width: 100%; height: auto; border-radius: 28px; background: var(--sk); }
+.shots.many { max-width: 498px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 12px; scrollbar-width: thin; }
+.shots.many .shot { scroll-snap-align: start; }
 .seg { display: inline-flex; background: var(--paper); border-radius: 10px; padding: 3px; }
 .seg button { border: 0; background: transparent; font: 500 14px/1 var(--body); padding: 9px 14px; border-radius: 8px; cursor: pointer; color: var(--ink-2); }
 .seg button[aria-pressed="true"] { background: var(--white); color: var(--ink); box-shadow: 0 1px 2px rgba(26,34,56,.12); }
@@ -210,6 +212,7 @@ a { color: inherit; }
   .phones { flex-direction: column; align-items: center; gap: 24px; }
   .shots { gap: 10px; width: 100%; justify-content: center; }
   .shot { width: calc(50% - 5px); max-width: 240px; padding: 5px; border-radius: 24px; }
+  .shots.many { max-width: none; justify-content: flex-start; }
   .shot img { border-radius: 20px; }
   .strip img { height: 280px; }
   .uth ul { grid-template-columns: 1fr; }

@@ -592,12 +592,14 @@
       ul.innerHTML = f.built.map(x => `<li>${esc(x)}</li>`).join("");
       r.querySelector(".feat-built-wrap").hidden = !f.built.length;
       const demoMode = this.mode === "demo";
-      r.querySelector(".feat-hint").textContent = demoMode || !hasDemo ? (demoMode ? f.hint || "" : "") : "";
+      r.querySelector(".feat-hint").textContent = demoMode ? (f.hint || "") : (hasShots && f.shots.length > 2 ? "Scroll the screens sideways to see more." : "");
       const modeEl = r.querySelector(".mode");
       modeEl.hidden = !(hasShots && hasDemo);
       modeEl.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === this.mode));
       const shotsEl = r.querySelector(".shots");
       shotsEl.hidden = demoMode;
+      shotsEl.classList.toggle("many", hasShots && f.shots.length > 2);
+      shotsEl.scrollLeft = 0;
       r.querySelector(".phones").hidden = !demoMode;
       if (!demoMode) {
         shotsEl.innerHTML = f.shots.map((src, j) => `<figure class="shot"><img src="${esc(src)}" alt="${esc((f.shotAlts || [])[j] || f.title)}" loading="lazy" decoding="async"></figure>`).join("");
