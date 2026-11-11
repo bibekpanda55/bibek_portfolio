@@ -507,6 +507,13 @@
     t.later(() => demos.tvmax(a, t), 9800);
   };
 
+  /* Images carry their real size, so nothing shifts while they load (Safari has no scroll anchoring). */
+  const SIZES = window.IMG_SIZES || {};
+  const img = (src, alt) => {
+    const wh = SIZES[src];
+    return `<img src="${esc(src)}" alt="${esc(alt)}"${wh ? ` width="${wh[0]}" height="${wh[1]}"` : ""} loading="lazy" decoding="async">`;
+  };
+
   /* ================= explorer component ================= */
   class Explorer {
     constructor(root, project) {
@@ -521,12 +528,18 @@
       if ("IntersectionObserver" in window) {
         let visible = true;
         new IntersectionObserver(([e]) => {
-          if (e.isIntersecting && !visible) { visible = true; this.show(this.i); }
+          if (e.isIntersecting && !visible) { visible = true; this.restartDemo(); }
           else if (!e.isIntersecting && visible) { visible = false; this.stop(); }
-        }, { threshold: .05 }).observe(root);
+        }, { rootMargin: "150px 0px" }).observe(root);
       }
     }
     stop() { this.timers.forEach(id => { clearTimeout(id); clearInterval(id); }); this.timers = []; }
+    restartDemo() {
+      const f = this.p.features[this.i];
+      if (this.mode !== "demo" || !demos[f.demo]) return;
+      this.stop();
+      demos[f.demo](this.root.querySelector(".sc-after"), this.t);
+    }
     build() {
       const many = this.p.features.length > 1;
       this.root.innerHTML = `
@@ -602,7 +615,7 @@
       shotsEl.scrollLeft = 0;
       r.querySelector(".phones").hidden = !demoMode;
       if (!demoMode) {
-        shotsEl.innerHTML = f.shots.map((src, j) => `<figure class="shot"><img src="${esc(src)}" alt="${esc((f.shotAlts || [])[j] || f.title)}" loading="lazy" decoding="async"></figure>`).join("");
+        shotsEl.innerHTML = f.shots.map((src, j) => `<figure class="shot">${img(src, (f.shotAlts || [])[j] || f.title)}</figure>`).join("");
         this.compare = false;
         this.cmp.hidden = true;
         r.querySelector(".feat").classList.remove("comparing");
@@ -657,7 +670,7 @@
         <div class="gallery">
           <h3>${esc(p.gallery.title)}</h3>
           <div class="strip" tabindex="0" aria-label="${esc(p.name)} screenshots, scrolls sideways">
-            ${p.gallery.images.map((src, j) => `<img src="${esc(src)}" alt="${esc(p.name)} screenshot ${j + 1}" loading="lazy" decoding="async">`).join("")}
+            ${p.gallery.images.map((src, j) => img(src, `${p.name} screenshot ${j + 1}`)).join("")}
           </div>
         </div>` : ""}
       ${p.underTheHood ? `

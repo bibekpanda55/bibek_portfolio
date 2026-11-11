@@ -16,3 +16,9 @@ No build step: it's plain HTML, CSS and JavaScript. Open `index.html` in a brows
 
 Finsco, Vine Gypsy and TVMAX use real screenshots (in `assets/img`); Innopay screens are working mockups and contain
 no real customer data.
+
+## Adding images
+
+Put images in `assets/img/` as `.webp`, then run `python3 tools/img_sizes.py` so each image
+gets its real size on the page. Without it, the layout shifts while images load and Safari
+jumps while scrolling.
