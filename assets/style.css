@@ -46,14 +46,11 @@ a { color: inherit; }
 /* Hero */
 .hero { max-width: var(--wrap); margin: 0 auto; padding: clamp(32px, 7vw, 96px) var(--gutter) clamp(40px, 6vw, 72px);
   display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 72px); align-items: end; }
-.hero-name { margin: 0; font: 800 clamp(56px, 9.8vw, 142px)/.86 var(--display); letter-spacing: -.045em; }
+.hero-name { margin: 0; font: 800 clamp(52px, 6.7vw, 96px)/.88 var(--display); letter-spacing: -.045em; }
 .hero-links { display: flex; gap: 10px; margin: 22px 0 0; }
-/* On wide screens the icons hang below the name, so the intro lines up with the name itself. */
+/* On wide screens the intro's top lines up with the top of the name. */
 @media (min-width: 861px) {
-  .hero { padding-bottom: calc(clamp(40px, 6vw, 72px) + 66px); align-items: start; }
-  .hero-id { position: relative; }
-  .hero-links { position: absolute; left: 0; top: 100%; }
-  .hero-side { padding-top: 0; }
+  .hero { align-items: start; }
 }
 .hero-links a { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; color: var(--ink); background: var(--white); border: 1px solid var(--line); transition: background .15s, color .15s, border-color .15s; }
 .hero-links a:hover { background: var(--ink); color: var(--white); border-color: var(--ink); }
