@@ -1,6 +1,8 @@
 /* All page content lives here. Edit text freely; app.js renders it. */
 window.PORTFOLIO = {
   contact: [
+    { label: "pandabibke75@gmail.com", href: "mailto:pandabibke75@gmail.com" },
+    { label: "LinkedIn", href: "https://www.linkedin.com/in/bibek-panda-a8ba66174" },
     { label: "github.com/bibekpanda55", href: "https://github.com/bibekpanda55" }
   ],
 

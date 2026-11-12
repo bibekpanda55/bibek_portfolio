@@ -601,7 +601,11 @@
       this.tabs.forEach((b, j) => {
         b.setAttribute("aria-selected", j === k);
         b.tabIndex = j === k ? 0 : -1;
-        if (j === k && window.innerWidth < 900) b.scrollIntoView({ block: "nearest", inline: "nearest", behavior: reduced ? "auto" : "smooth" });
+        // Keep the selected tab visible by scrolling the tab row sideways only, never the page.
+        if (j === k && b.parentElement.scrollWidth > b.parentElement.clientWidth) {
+          const row = b.parentElement, left = b.offsetLeft - (row.clientWidth - b.offsetWidth) / 2;
+          row.scrollTo({ left: Math.max(0, left), behavior: reduced ? "auto" : "smooth" });
+        }
       });
       const r = this.root;
       r.querySelector(".feat-title").textContent = f.title;
@@ -699,5 +703,5 @@
       <div><h3>${esc(j.role)}, ${esc(j.company)}</h3><p>${esc(j.text)}</p></div>
     </li>`).join("");
   $("#skills").innerHTML = `<h3>Tools I use</h3><dl>${D.skills.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>`;
-  $("#contact-links").innerHTML = D.contact.map(c => `<a href="${esc(c.href)}">${esc(c.label)}</a>`).join("<br>");
+  $("#contact-links").innerHTML = D.contact.map(c => `<a href="${esc(c.href)}"${/^https?:/.test(c.href) ? ' target="_blank" rel="noopener"' : ""}>${esc(c.label)}</a>`).join("<br>");
 })();

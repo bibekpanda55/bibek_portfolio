@@ -47,6 +47,9 @@ a { color: inherit; }
 .hero { max-width: var(--wrap); margin: 0 auto; padding: clamp(32px, 7vw, 96px) var(--gutter) clamp(40px, 6vw, 72px);
   display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 72px); align-items: end; }
 .hero-name { margin: 0; font: 800 clamp(64px, 13.5vw, 196px)/.86 var(--display); letter-spacing: -.045em; }
+.hero-links { display: flex; gap: 10px; margin: 22px 0 0; }
+.hero-links a { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; color: var(--ink); background: var(--white); border: 1px solid var(--line); transition: background .15s, color .15s, border-color .15s; }
+.hero-links a:hover { background: var(--ink); color: var(--white); border-color: var(--ink); }
 .hero-side { padding-bottom: 12px; max-width: 34em; }
 .hero-role { margin: 0 0 14px; font: 600 15px/1.3 var(--body); color: var(--muted); }
 .hero-intro { margin: 0 0 24px; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.5; }
