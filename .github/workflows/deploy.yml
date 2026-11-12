@@ -33,6 +33,9 @@ jobs:
           node --check assets/app.js
           node --check assets/data.js
 
+      - name: Refresh App Store versions
+        run: python3 tools/refresh_store.py
+
       - name: Prepare the site folder
         run: |
           mkdir -p _site

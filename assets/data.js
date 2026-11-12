@@ -6,6 +6,62 @@ window.PORTFOLIO = {
     { label: "github.com/bibekpanda55", href: "https://github.com/bibekpanda55" }
   ],
 
+  /* Hero phone: one real screen per app. Boxes are widget outlines in % of the screenshot,
+     named after the actual widget classes in each app's code. */
+  reel: [
+    {
+      app: "Innopay Messenger", project: "innopay", root: "MessengerHomeScreen",
+      src: "assets/img/innopay/messenger/chats.webp", bg: "#FFFFFF",
+      alt: "Innopay Messenger chat list",
+      widgets: [
+        { n: "ChatListWidget", x: 1.5, y: 34, w: 97, h: 65.5, lp: "tr" },
+        { n: "StatusIndicatorWidget", x: 3.5, y: 35.5, w: 13, h: 8.5 },
+        { n: "ChatContactTileWidget", x: 3, y: 45.5, w: 94, h: 9.5 },
+        { n: "UnreadMsgBadgeWidget", x: 83, y: 60, w: 9, h: 5, lp: "tr" }
+      ]
+    },
+    {
+      app: "Innopay home", project: "innopay", root: "InnopayHomeScreen",
+      src: "assets/img/innopay/home/services.webp", bg: "#F6F6F8",
+      alt: "Innopay home screen with services and a bill reminder",
+      widgets: [
+        { n: "HomeScreenSearchButton", x: 16, y: 7.8, w: 83, h: 6.5 },
+        { n: "CategoriesSection", x: 2, y: 14.5, w: 96, h: 27 },
+        { n: "CreditCardBillCard", x: 2, y: 43.5, w: 96, h: 8.6 }
+      ]
+    },
+    {
+      app: "Vine Gypsy", project: "vinegypsy", root: "WineryMapScreen",
+      src: "assets/img/vinegypsy/map.webp", bg: "#FFFFFF",
+      alt: "Vine Gypsy map of tasting rooms with filters",
+      widgets: [
+        { n: "AppBarWidget", x: 0.5, y: 9.5, w: 99, h: 6.5 },
+        { n: "WineryFilterWidget", x: 0.5, y: 17, w: 99, h: 8 },
+        { n: "MapsWidget", x: 0.5, y: 26, w: 99, h: 36 },
+        { n: "MapInfoSheet", x: 0.5, y: 63, w: 99, h: 36.5 }
+      ]
+    },
+    {
+      app: "Finsco", project: "finsco", root: "PortfolioScreen",
+      src: "assets/img/finsco/portfolio-score.webp", bg: "#FFFFFF",
+      alt: "Finsco portfolio with market value and score",
+      widgets: [
+        { n: "PortfolioWidget", x: 4, y: 19, w: 92, h: 36.5 },
+        { n: "GridTile", x: 2, y: 69, w: 96, h: 21.5 }
+      ]
+    },
+    {
+      app: "TVMAX", project: "tvmax", root: "HomeScreen",
+      src: "assets/img/tvmax/home.webp", bg: "#1A0F0B",
+      alt: "TVMAX home with the set-top box and channel categories",
+      widgets: [
+        { n: "DeviceCarousel", x: 1, y: 31, w: 99, h: 34.5, lp: "tr" },
+        { n: "DeviceCard", x: 3, y: 33.5, w: 94, h: 22.5 },
+        { n: "CategoryGrid", x: 1, y: 69, w: 98, h: 30.5 }
+      ]
+    }
+  ],
+
   projects: [
     {
       id: "innopay",

@@ -697,6 +697,62 @@
     new Explorer(sec.querySelector(".explorer"), p);
   });
 
+  /* ================= hero phone: real screens with a widget inspector ================= */
+  (() => {
+    const R = D.reel, host = $("#reel");
+    if (!R || !host) return;
+    const slide = (s, i) => {
+      const wh = SIZES[s.src] || [560, 1218];
+      return `<div class="reel-slide${i ? "" : " on"}" style="background:${s.bg}" aria-hidden="${i ? "true" : "false"}">
+        <div class="reel-shot">
+          <img src="${esc(s.src)}" alt="${esc(s.alt)}" width="${wh[0]}" height="${wh[1]}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'} decoding="async">
+          <div class="reel-ov" aria-hidden="true">
+            <span class="wbox root"><i>${esc(s.root)}</i></span>
+            ${s.widgets.map(w => `<span class="wbox${w.lp ? " lp-" + w.lp : ""}" style="left:${w.x}%;top:${w.y}%;width:${w.w}%;height:${w.h}%"><i>${esc(w.n)}</i></span>`).join("")}
+          </div>
+        </div>
+      </div>`;
+    };
+    host.innerHTML = `
+      <div class="reel-phone"><div class="island"></div><div class="reel-screen">${R.map(slide).join("")}</div></div>
+      <figcaption class="reel-bar">
+        <a class="reel-app" href="#p-${R[0].project}">${esc(R[0].app)}</a>
+        <span class="reel-dots">${R.map((s, i) => `<button type="button" data-i="${i}" aria-label="Show ${esc(s.app)}" aria-current="${!i}"></button>`).join("")}</span>
+      </figcaption>
+      <label class="reel-toggle"><input type="checkbox" id="reel-inspect"><span class="sw" aria-hidden="true"></span>Show widgets</label>
+      <div class="reel-store" hidden></div>`;
+    const slides = [...host.querySelectorAll(".reel-slide")], dots = [...host.querySelectorAll(".reel-dots button")];
+    const link = host.querySelector(".reel-app"), toggle = host.querySelector("#reel-inspect");
+    let i = 0, timer = null, hover = false, visible = true;
+    const go = (n) => {
+      slides[i].classList.remove("on"); slides[i].setAttribute("aria-hidden", "true");
+      i = (n + R.length) % R.length;
+      slides[i].classList.add("on"); slides[i].setAttribute("aria-hidden", "false");
+      dots.forEach((d, k) => d.setAttribute("aria-current", k === i));
+      link.textContent = R[i].app; link.href = `#p-${R[i].project}`;
+    };
+    const tick = () => {
+      clearInterval(timer); timer = null;
+      if (reduced || toggle.checked || hover || !visible) return;
+      timer = setInterval(() => go(i + 1), 3800);
+    };
+    dots.forEach(d => d.addEventListener("click", () => { go(+d.dataset.i); tick(); }));
+    toggle.addEventListener("change", () => { host.classList.toggle("inspect", toggle.checked); tick(); });
+    host.addEventListener("mouseenter", () => { hover = true; tick(); });
+    host.addEventListener("mouseleave", () => { hover = false; tick(); });
+    if ("IntersectionObserver" in window) new IntersectionObserver(([e]) => { visible = e.isIntersecting; tick(); }).observe(host);
+    tick();
+
+    /* Live on the App Store: versions refreshed by the deploy workflow */
+    const fmt = d => new Date(d + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    fetch("assets/store.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).then(st => {
+      if (!st || !st.apps || !st.apps.length) return;
+      const box = host.querySelector(".reel-store");
+      box.innerHTML = `<p>Live on the App Store</p><ul>${st.apps.map(a => `<li><a href="https://apps.apple.com/in/app/id${esc(a.id)}" target="_blank" rel="noopener">${esc(a.name)}</a><span>v${esc(a.version)}, ${fmt(a.released)}</span></li>`).join("")}</ul>`;
+      box.hidden = false;
+    }).catch(() => {});
+  })();
+
   $("#jobs").innerHTML = D.jobs.map(j => `
     <li>
       <span class="j-period">${esc(j.period)}</span>
