@@ -713,11 +713,41 @@
     new Explorer(sec.querySelector(".explorer"), p);
   });
 
-  /* ================= hero: Flutter hot reload, state kept ================= */
+  /* ================= hero: Flutter hot reload, plus three hidden Flutter demos ================= */
   (() => {
     const host = $("#hotreload");
     if (!host) return;
-    // Tokens: [class, text, key?]. Keys mark the values the demo edits.
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const inr = n => "₹" + Math.round(n).toLocaleString("en-IN");
+    // Code tokens: [class, text, key?]. Keys mark values a demo edits.
+    const codeHTML = lines => lines.map(line => `<span class="ln">${line.map(([c, t, k]) =>
+      `<span${c ? ` class="tk-${c}"` : ""}${k ? ` data-k="${k}"` : ""}>${esc(t)}</span>`).join("") || " "}</span>`).join("");
+    // Light syntax colouring for plain Dart strings (used by the hidden demos).
+    const KW = /^(class|final|required|return|this|const|true|false)$/;
+    const dart = src => src.split("\n").map(l => {
+      if (/^\s*\/\//.test(l)) return [["c", l]];
+      const out = [];
+      l.replace(/('[^']*')|(@\w+)|(\b\d[\w.]*\b)|(\b[A-Z]\w*\b)|(\b[a-z_]\w*\b)|([^'@\w]+)/g, (m, s, a, n, T, w, p) => {
+        out.push([s ? "s" : a ? "f" : n ? "n" : T ? "t" : w && KW.test(w) ? "k" : "", m]);
+        return m;
+      });
+      return out;
+    });
+    const editor = (file, tag, body) => `
+      <div class="hr-ed">
+        <div class="hr-bar"><span class="hr-file">${file}</span>${tag}</div>
+        <pre class="hr-code" aria-hidden="true"><code>${body}</code></pre>
+      </div>`;
+
+    /* ---------- scheduling: each demo runs only while it is on screen ---------- */
+    let cur = "hr", visible = true, waiters = [];
+    const ok = s => visible && !document.hidden && cur === s;
+    const ready = s => ok(s) ? Promise.resolve() : new Promise(r => waiters.push([s, r]));
+    const check = () => { waiters = waiters.filter(([s, r]) => (ok(s) ? (r(), false) : true)); };
+    if ("IntersectionObserver" in window) new IntersectionObserver(([e]) => { visible = e.isIntersecting; check(); }).observe(host);
+    document.addEventListener("visibilitychange", check);
+
+    /* ---------- the visible demo: hot reload keeps state ---------- */
     const L = [
       [["t", "int"], ["", " people = "], ["n", "2"], ["", ";  "], ["c", "// state"]],
       [],
@@ -737,45 +767,46 @@
     ];
     const NAMES = ["Asha", "Bibek", "Chirag", "Divya", "Esha", "Farhan"];
     const TINTS = ["#E9A400", "#7FA7E8", "#E58C6A", "#9CC59A", "#C9A2E0", "#F2C46B"];
-    const code = L.map(line => `<span class="ln">${line.map(([c, t, k]) =>
-      `<span${c ? ` class="tk-${c}"` : ""}${k ? ` data-k="${k}"` : ""}>${esc(t)}</span>`).join("") || " "}</span>`).join("");
+    const billCard = (o, cls = "") => `
+      <div class="bc ${cls}" style="--bc:${o.bg};--fg:${o.fg || "#fff"};--br:${o.radius || 12}px">
+        <div class="bc-top"><span class="bc-title">${esc(o.title)}</span><span class="bc-total">${inr(o.total)}</span></div>
+        <div class="bc-people" aria-hidden="true">${NAMES.slice(0, o.people).map((n, i) => `<span style="background:${TINTS[i]}">${n[0]}</span>`).join("")}</div>
+        <div class="bc-foot"><span class="bc-each">${inr(o.total / o.people)} each</span>${o.buttons || ""}</div>
+      </div>`;
+
     host.innerHTML = `
-      <div class="hr-ed" aria-hidden="true">
-        <div class="hr-bar"><span class="hr-file">split_bill.dart</span><span class="hr-bolt">⚡ Hot reload</span></div>
-        <pre class="hr-code"><code>${code}</code></pre>
-      </div>
-      <div class="hr-prev">
-        <div class="bc">
-          <div class="bc-top"><span class="bc-title">Dinner</span><span class="bc-total">₹2,400</span></div>
-          <div class="bc-people" aria-hidden="true"></div>
-          <div class="bc-foot">
-            <span class="bc-each"></span>
-            <span class="bc-btns">
-              <button type="button" class="bc-minus" aria-label="Remove a person">−</button>
-              <button type="button" class="bc-plus" aria-label="Add a person">+</button>
-            </span>
-          </div>
+      <div class="stage on" data-s="hr">
+        <div class="hr-ed">
+          <div class="hr-bar"><span class="hr-file">split_bill.dart</span><button type="button" class="hr-bolt" tabindex="-1">⚡ Hot reload</button></div>
+          <pre class="hr-code" aria-hidden="true"><code>${codeHTML(L)}</code></pre>
         </div>
-        <p class="hr-status" aria-live="polite">Tap <b>+</b> or <b>−</b>, then watch the next reload keep it.</p>
+        <div class="hr-prev">
+          ${billCard({ title: "Dinner", total: 2400, people: 2, bg: "#1A2238", buttons: `<span class="bc-btns">
+            <button type="button" class="bc-minus" aria-label="Remove a person">−</button>
+            <button type="button" class="bc-plus" aria-label="Add a person">+</button></span>` }, "live")}
+          <p class="hr-status" aria-live="polite">Tap <b>+</b> or <b>−</b>, then watch the next reload keep it.</p>
+        </div>
+        <p class="hr-cap">Flutter hot reload: the code changes, the state stays.<br><span class="egg-hint">✦ 3 more Flutter things are hidden on this page.</span></p>
       </div>
-      <figcaption class="hr-cap">Flutter hot reload: the code changes, the state stays.</figcaption>`;
+      <div class="stage" data-s="previews"></div>
+      <div class="stage" data-s="dart"></div>
+      <div class="stage" data-s="carousel"></div>
+      <div class="egg-bar" hidden>
+        <p class="egg-note" aria-live="polite"></p>
+        <button type="button" class="egg-back">← Back to hot reload</button>
+      </div>`;
 
     const q = s => host.querySelector(s);
-    const tok = k => q(`[data-k="${k}"]`);
-    const card = q(".bc"), status = q(".hr-status"), bolt = q(".hr-bolt");
+    const card = q(".bc.live"), status = q(".hr-status"), bolt = q(".hr-bolt");
     const st = { title: "'Dinner'", total: "2400", color: "0xFF1A2238", radius: "12" };
     let people = 2, touched = false;
-
-    const inr = n => "₹" + Math.round(n).toLocaleString("en-IN");
     const render = () => {
-      const hex = "#" + st.color.slice(4);
-      card.style.setProperty("--bc", hex);
+      card.style.setProperty("--bc", "#" + st.color.slice(4));
       card.style.setProperty("--br", st.radius + "px");
-      q(".bc-title").textContent = st.title.replace(/'/g, "");
-      q(".bc-total").textContent = inr(+st.total);
-      q(".bc-each").textContent = `${inr(+st.total / people)} each`;
-      q(".bc-people").innerHTML = NAMES.slice(0, people).map((n, i) =>
-        `<span style="background:${TINTS[i]}">${n[0]}</span>`).join("");
+      card.querySelector(".bc-title").textContent = st.title.replace(/'/g, "");
+      card.querySelector(".bc-total").textContent = inr(+st.total);
+      card.querySelector(".bc-each").textContent = `${inr(+st.total / people)} each`;
+      card.querySelector(".bc-people").innerHTML = NAMES.slice(0, people).map((n, i) => `<span style="background:${TINTS[i]}">${n[0]}</span>`).join("");
       q(".bc-minus").disabled = people <= 1;
       q(".bc-plus").disabled = people >= NAMES.length;
     };
@@ -788,22 +819,15 @@
     q(".bc-plus").addEventListener("click", () => change(1, true));
     q(".bc-minus").addEventListener("click", () => change(-1, true));
     render();
-
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
-    let visible = true, wake = null;
-    const ready = () => (visible && !document.hidden) ? Promise.resolve() : new Promise(r => { wake = r; });
-    const check = () => { if (visible && !document.hidden && wake) { wake(); wake = null; } };
-    if ("IntersectionObserver" in window) new IntersectionObserver(([e]) => { visible = e.isIntersecting; check(); }).observe(host);
-    document.addEventListener("visibilitychange", check);
-
+    const flash = () => { bolt.classList.remove("flash"); void bolt.offsetWidth; bolt.classList.add("flash"); };
     const tap = async (sel, d) => {
       const b = q(sel);
       b.classList.add("tap"); await sleep(260);
       change(d, false); await sleep(240); b.classList.remove("tap");
     };
     const edit = async ([k, v]) => {
-      const el = tok(k);
-      if (reduced) { el.textContent = v; }
+      const el = host.querySelector(`[data-s="hr"] [data-k="${k}"]`);
+      if (reduced) el.textContent = v;
       else {
         el.classList.add("sel"); await sleep(520);
         el.classList.remove("sel"); el.textContent = ""; el.classList.add("typing");
@@ -811,29 +835,251 @@
         el.classList.remove("typing"); await sleep(320);
       }
       st[k] = v;
-      bolt.classList.remove("flash"); void bolt.offsetWidth; bolt.classList.add("flash");
+      flash();
       card.classList.add("reloaded");
       render();
       status.innerHTML = `⚡ Reloaded <b>${k}</b>. State kept: <b>people = ${people}</b>.`;
       await sleep(500); card.classList.remove("reloaded");
     };
-
     (async () => {
       await sleep(1200);
-      let n = 0;
-      for (;;) {
-        await ready();
+      for (let n = 0; ; n++) {
+        await ready("hr");
         // Change the state now and then, so the reload visibly keeps it.
         if (!touched && n % 4 === 0 && !reduced) {
           await tap(people >= 4 ? ".bc-minus" : ".bc-plus", people >= 4 ? -1 : 1);
           await sleep(1300);
-          await ready();
+          await ready("hr");
         }
         await edit(EDITS[n % EDITS.length]);
-        n++;
         await sleep(reduced ? 5000 : 2600);
       }
     })();
+
+    /* ---------- hidden demo 1: Widget Previews (stable in Flutter 3.47) ---------- */
+    const buildPreviews = el => {
+      const src = `@Preview(name: 'Light')
+@Preview(name: 'Dark',
+    brightness: Brightness.dark)
+@Preview(name: 'Large text',
+    textScaleFactor: 1.6)
+Widget billCard() => BillCard(
+    title: 'Dinner', total: 2400);`;
+      const base = { title: "Dinner", total: 2400, people: 2, radius: 12 };
+      el.innerHTML = `${editor("bill_card_preview.dart", `<span class="hr-tag">Flutter 3.47</span>`, codeHTML(dart(src)))}
+        <div class="pv-panel">
+          <p class="pv-head"><span>Widget Previewer</span><span>3 previews</span></p>
+          <div class="pv-grid">
+            <figure class="pv"><figcaption>Light</figcaption>${billCard({ ...base, bg: "#FFFFFF", fg: "#1A2238" }, "mini")}</figure>
+            <figure class="pv dark"><figcaption>Dark</figcaption>${billCard({ ...base, bg: "#1A2238" }, "mini")}</figure>
+            <figure class="pv wide"><figcaption>Large text</figcaption>${billCard({ ...base, bg: "#FFFFFF", fg: "#1A2238" }, "mini big")}</figure>
+          </div>
+        </div>
+        <p class="hr-cap">Widget Previews, stable in Flutter 3.47: one widget in several setups, without running the app.</p>`;
+      (async () => {
+        const pv = [...el.querySelectorAll(".pv")];
+        for (;;) {
+          await ready("previews");
+          pv.forEach(p => p.classList.remove("in"));
+          for (const p of pv) { await sleep(reduced ? 0 : 380); p.classList.add("in"); }
+          await sleep(6500);
+        }
+      })();
+    };
+
+    /* ---------- hidden demo 2: shorter Dart (3.13 primary constructors, 3.10 dot shorthands) ---------- */
+    const buildDart = el => {
+      const SNIPS = [
+        { file: "txn.dart", tag: "Dart 3.13", what: "Primary constructors",
+          before: `class Txn {
+  final String id;
+  final int amount;
+  final TxnStatus status;
+
+  Txn({
+    required this.id,
+    required this.amount,
+    required this.status,
+  });
+}`,
+          after: `class Txn({
+  required final String id,
+  required final int amount,
+  required final TxnStatus status,
+});` },
+        { file: "txn_row.dart", tag: "Dart 3.10", what: "Dot shorthands",
+          before: `Row(
+  mainAxisSize: MainAxisSize.min,
+  children: [
+    StatusChip(status: TxnStatus.paid),
+    Text(label, style: TextStyle(
+      fontWeight: FontWeight.w600)),
+  ],
+)`,
+          after: `Row(
+  mainAxisSize: .min,
+  children: [
+    StatusChip(status: .paid),
+    Text(label, style: TextStyle(
+      fontWeight: .w600)),
+  ],
+)`,
+          // tokens removed on the way from before to after
+          drop: ["MainAxisSize", "TxnStatus", "FontWeight"] }
+      ];
+      el.innerHTML = `${editor(`<span class="dt-file"></span>`, `<span class="hr-tag dt-tag"></span>`, "")}
+        <p class="dt-count"><span class="dt-what"></span><b class="dt-num"></b></p>
+        <p class="hr-cap">Same code, less typing: Dart 3.13 makes primary constructors stable, and Dart 3.10 added dot shorthands.</p>`;
+      const code = el.querySelector("code"), file = el.querySelector(".dt-file"), tag = el.querySelector(".dt-tag");
+      const what = el.querySelector(".dt-what"), num = el.querySelector(".dt-num");
+      const chars = s => s.replace(/\s+/g, "").length;
+      (async () => {
+        for (let i = 0; ; i++) {
+          const s = SNIPS[i % SNIPS.length];
+          await ready("dart");
+          file.textContent = s.file; tag.textContent = s.tag; what.textContent = s.what;
+          code.className = "";
+          code.innerHTML = codeHTML(dart(s.before));
+          const bl = s.before.split("\n").length;
+          num.textContent = s.drop ? `${chars(s.before)} characters` : `${bl} lines`;
+          await sleep(reduced ? 1500 : 1800);
+          await ready("dart");
+          if (s.drop) {
+            // strike the type names that the shorthand makes unnecessary
+            code.querySelectorAll(".tk-t").forEach(t => { if (s.drop.includes(t.textContent)) t.classList.add("gone"); });
+          } else {
+            code.querySelectorAll(".ln").forEach(ln => {
+              if (/^\s*final |^\s*required this\.|^\s*Txn\(\{|^\s*\}\);|^\s*\}$|^\s*$/.test(ln.textContent)) ln.classList.add("gone");
+            });
+          }
+          await sleep(reduced ? 600 : 1300);
+          code.innerHTML = codeHTML(dart(s.after));
+          code.className = "fresh";
+          num.textContent = s.drop ? `${chars(s.before)} → ${chars(s.after)} characters` : `${bl} → ${s.after.split("\n").length} lines`;
+          await sleep(4200);
+        }
+      })();
+    };
+
+    /* ---------- hidden demo 3: infinite CarouselView (Flutter 3.44) ---------- */
+    const buildCarousel = el => {
+      const OFFERS = [
+        { t: "Bill payments", s: "Electricity, water, gas", c: "#1A2238" },
+        { t: "Mobile recharge", s: "Plans from every operator", c: "#0F7B6C" },
+        { t: "Bus tickets", s: "Pick a seat, pay with UPI", c: "#B5542E" },
+        { t: "Split a bill", s: "Right inside the chat", c: "#5B4BC4" },
+        { t: "FASTag", s: "Top up before the toll", c: "#8A6A00" }
+      ];
+      const src = `CarouselView(
+  itemExtent: 220,
+  infinite: true,
+  onIndexChanged: (i) =>
+      setState(() => index = i),
+  children: offers,
+)`;
+      const N = OFFERS.length, COPIES = 5;
+      const slides = Array.from({ length: N * COPIES }, (_, k) => OFFERS[k % N])
+        .map((o, k) => `<div class="cv-item" style="--c:${o.c}"><b>${esc(o.t)}</b><span>${esc(o.s)}</span><i>${(k % N) + 1}/${N}</i></div>`).join("");
+      el.innerHTML = `${editor("offers.dart", `<span class="hr-tag">Flutter 3.44</span>`, codeHTML(dart(src)))}
+        <div class="cv" tabindex="0" aria-label="Offers carousel that loops forever. Drag or scroll sideways.">${slides}</div>
+        <p class="cv-status"><span>onIndexChanged → <b class="cv-i">0</b></span><span class="cv-loop">loops: <b>0</b></span></p>
+        <p class="hr-cap">CarouselView loops forever since Flutter 3.44. Drag it either way, it never runs out.</p>`;
+      const cv = el.querySelector(".cv"), idx = el.querySelector(".cv-i"), loops = el.querySelector(".cv-loop b");
+      let W = 0, lastI = -1, laps = 0, user = 0;
+      const measure = () => { const it = cv.querySelector(".cv-item"); W = it ? it.offsetWidth + 10 : 230; };
+      const centre = () => { measure(); cv.scrollLeft = W * N * 2; };
+      // Keep the strip in the middle copies so it can scroll forever both ways.
+      cv.addEventListener("scroll", () => {
+        if (!W) return;
+        const set = W * N;
+        if (cv.scrollLeft < set) { cv.scrollLeft += set * 2; laps++; }
+        else if (cv.scrollLeft > set * 3) { cv.scrollLeft -= set * 2; laps++; }
+        const i = Math.round(cv.scrollLeft / W) % N;
+        if (i !== lastI) { lastI = i; idx.textContent = i; idx.parentElement.classList.remove("ping"); void idx.offsetWidth; idx.parentElement.classList.add("ping"); }
+        loops.textContent = laps;
+      }, { passive: true });
+      ["pointerdown", "wheel", "touchstart", "keydown"].forEach(ev => cv.addEventListener(ev, () => { user = Date.now(); }, { passive: true }));
+      // drag with a mouse
+      let drag = null;
+      cv.addEventListener("pointerdown", e => { if (e.pointerType === "mouse") { drag = { x: e.clientX, s: cv.scrollLeft }; cv.classList.add("grab"); cv.setPointerCapture(e.pointerId); } });
+      cv.addEventListener("pointermove", e => { if (drag) cv.scrollLeft = drag.s - (e.clientX - drag.x); });
+      const end = () => { if (!drag) return; drag = null; cv.classList.remove("grab"); cv.scrollTo({ left: Math.round(cv.scrollLeft / W) * W, behavior: "smooth" }); };
+      cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end);
+      requestAnimationFrame(centre);
+      (async () => {
+        for (;;) {
+          await ready("carousel");
+          if (!W) centre();
+          await sleep(2400);
+          if (cur === "carousel" && !reduced && Date.now() - user > 4000) cv.scrollBy({ left: W, behavior: "smooth" });
+        }
+      })();
+    };
+
+    /* ---------- finding them ---------- */
+    const EGGS = {
+      previews: { label: "Widget Previews", build: buildPreviews },
+      dart: { label: "Shorter Dart", build: buildDart },
+      carousel: { label: "Endless CarouselView", build: buildCarousel }
+    };
+    let found = [];
+    try { found = JSON.parse(localStorage.getItem("bp-eggs") || "[]").filter(k => EGGS[k]); } catch (e) {}
+    const built = {};
+    const bar = q(".egg-bar"), note = q(".egg-note"), back = q(".egg-back");
+    const setStage = s => {
+      cur = s;
+      host.querySelectorAll(".stage").forEach(x => x.classList.toggle("on", x.dataset.s === s));
+      check();
+    };
+    let lastFocus = null;
+    const open = k => {
+      if (!built[k]) { EGGS[k].build(host.querySelector(`.stage[data-s="${k}"]`)); built[k] = true; }
+      if (!found.includes(k)) { found.push(k); try { localStorage.setItem("bp-eggs", JSON.stringify(found)); } catch (e) {} }
+      setStage(k);
+      const left = Object.keys(EGGS).filter(x => !found.includes(x)).length;
+      note.innerHTML = `✦ You found <b>${found.length} of 3</b>: ${EGGS[k].label}.` + (left ? "" : " That's all of them, nice.");
+      bar.hidden = false;
+      q(".egg-hint").textContent = left ? `✦ ${left} more Flutter thing${left > 1 ? "s are" : " is"} hidden on this page.` : "✦ You found all 3 hidden Flutter demos.";
+      const narrow = !window.matchMedia("(min-width: 1100px)").matches;
+      host.classList.toggle("sheet", narrow);
+      back.textContent = narrow ? "Close" : "← Back to hot reload";
+      document.body.classList.toggle("egg-sheet", narrow);
+      if (narrow) { lastFocus = document.activeElement; back.focus({ preventScroll: true }); }
+      else if (host.getBoundingClientRect().bottom < 0) host.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
+    };
+    const close = () => {
+      bar.hidden = true;
+      setStage("hr");
+      if (host.classList.contains("sheet")) { host.classList.remove("sheet"); document.body.classList.remove("egg-sheet"); if (lastFocus) lastFocus.focus({ preventScroll: true }); }
+    };
+    back.addEventListener("click", close);
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && cur !== "hr") close(); });
+    document.addEventListener("click", e => { if (host.classList.contains("sheet") && e.target === document.body) close(); });
+
+    // 1. the little phone in the top bar
+    const mark = $(".mark-phone");
+    if (mark) mark.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); open("previews"); });
+    // 2. the ⚡ Hot reload tag, three quick clicks
+    let clicks = [];
+    bolt.addEventListener("click", () => {
+      flash();
+      const now = Date.now();
+      clicks = clicks.filter(t => now - t < 1400).concat(now);
+      if (clicks.length >= 3) { clicks = []; open("dart"); }
+    });
+    // 3. typing `flutter run` anywhere on the page
+    let typed = "";
+    document.addEventListener("keydown", e => {
+      if (e.metaKey || e.ctrlKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+      if (e.key.length !== 1) return;
+      typed = (typed + e.key.toLowerCase()).slice(-11);
+      if (typed === "flutter run") { typed = ""; open("carousel"); }
+    });
+    // the hint reflects what this visitor already found
+    if (found.length) {
+      const left = 3 - found.length;
+      q(".egg-hint").textContent = left ? `✦ ${left} more Flutter thing${left > 1 ? "s are" : " is"} hidden on this page.` : "✦ You found all 3 hidden Flutter demos.";
+    }
   })();
 
   /* Live on the App Store: versions refreshed by the deploy workflow */
