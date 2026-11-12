@@ -142,13 +142,28 @@ window.PORTFOLIO = {
           id: "bus",
           title: "Bus tickets without leaving the app",
           short: "Bus tickets",
-          what: "Bus booking is a partner web flow. I built the native shell around it so it feels like part of Innopay.",
+          what: "Bus booking runs as a web flow inside the app. I built the native shell around it so searching, picking seats, paying and downloading the ticket feel like part of Innopay.",
           built: [
             "Single sign-on into the booking site, refreshed if a link reopens the screen",
             "Hands UPI payments to the user's UPI app and closes the gateway when it returns",
             "Downloads tickets as PDFs named from the server, and opens phone, mail and map links outside",
             "Recovers from load errors and from iOS killing the web process in the background"
           ],
+          shots: [
+            "assets/img/innopay/bus/search.webp",
+            "assets/img/innopay/bus/results.webp",
+            { src: "assets/img/innopay/bus/seats.webp", scroll: true },
+            "assets/img/innopay/bus/payment.webp",
+            { src: "assets/img/innopay/bus/ticket.webp", scroll: true }
+          ],
+          shotAlts: [
+            "Bus search with from, to and travel date, recent searches and popular routes",
+            "Bus results from Bangalore to Hyderabad with filters, fares and seats left",
+            "Seat selection with lower and upper decks, fare filters and seat legend",
+            "Payment method screen with passenger details, discount and a price timer",
+            "Ticket details with booking ID, boarding and dropping points, fare and ticket download"
+          ],
+          shotsHint: "Screens from the bus booking design. The seat map and ticket scroll inside the phone.",
           demo: "bus",
           hint: "The phone books and pays for a ticket."
         }
