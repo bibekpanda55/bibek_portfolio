@@ -1018,9 +1018,9 @@ Widget billCard() => BillCard(
 
     /* ---------- finding them ---------- */
     const EGGS = {
-      previews: { label: "Widget Previews", build: buildPreviews },
-      dart: { label: "Shorter Dart", build: buildDart },
-      carousel: { label: "Endless CarouselView", build: buildCarousel }
+      previews: { label: "Widget Previews", build: buildPreviews, hint: "the little phone in the top bar is more than a logo." },
+      dart: { label: "Shorter Dart", build: buildDart, hint: "⚡ Hot reload likes being clicked three times, quickly. ", laptop: true },
+      carousel: { label: "Endless CarouselView", build: buildCarousel, hint: "type the command that starts a Flutter app. ", laptop: true }
     };
     let found = [];
     try { found = JSON.parse(localStorage.getItem("bp-eggs") || "[]").filter(k => EGGS[k]); } catch (e) {}
@@ -1037,7 +1037,9 @@ Widget billCard() => BillCard(
       if (!found.includes(k)) { found.push(k); try { localStorage.setItem("bp-eggs", JSON.stringify(found)); } catch (e) {} }
       setStage(k);
       const left = Object.keys(EGGS).filter(x => !found.includes(x)).length;
-      note.innerHTML = `✦ You found <b>${found.length} of 3</b>: ${EGGS[k].label}.` + (left ? "" : " That's all of them, nice.");
+      const next = Object.keys(EGGS).find(x => !found.includes(x));
+      note.innerHTML = `✦ You found <b>${found.length} of 3</b>: ${EGGS[k].label}.` +
+        (next ? `<span class="egg-clue">Hint for the next one: ${EGGS[next].hint}${EGGS[next].laptop && !window.matchMedia("(min-width: 1100px)").matches ? " (Try this one on a laptop.)" : ""}</span>` : " That's all of them, nice.");
       bar.hidden = false;
       q(".egg-hint").textContent = left ? `✦ ${left} more Flutter thing${left > 1 ? "s are" : " is"} hidden on this page.` : "✦ You found all 3 hidden Flutter demos.";
       const narrow = !window.matchMedia("(min-width: 1100px)").matches;
