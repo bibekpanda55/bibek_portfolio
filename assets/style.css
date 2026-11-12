@@ -50,9 +50,10 @@ a { color: inherit; }
 .hero-links { display: flex; gap: 10px; margin: 22px 0 0; }
 /* On wide screens the icons hang below the name, so the intro lines up with the name itself. */
 @media (min-width: 861px) {
-  .hero { padding-bottom: calc(clamp(40px, 6vw, 72px) + 66px); }
+  .hero { padding-bottom: calc(clamp(40px, 6vw, 72px) + 66px); align-items: start; }
   .hero-id { position: relative; }
   .hero-links { position: absolute; left: 0; top: 100%; }
+  .hero-side { padding-top: .28vw; }
 }
 .hero-links a { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; color: var(--ink); background: var(--white); border: 1px solid var(--line); transition: background .15s, color .15s, border-color .15s; }
 .hero-links a:hover { background: var(--ink); color: var(--white); border-color: var(--ink); }
