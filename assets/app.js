@@ -519,6 +519,14 @@
     return `<img src="${esc(src)}" alt="${esc(alt)}"${size} loading="lazy" decoding="async">`;
   };
 
+  /* Widget outlines for real screenshots, keyed by image path */
+  const WMAP = {};
+  (D.widgetMaps || []).forEach(m => { WMAP[m.src] = m; });
+  const overlay = m => `<div class="w-ov" aria-hidden="true">
+      <span class="wbox root"><i>${esc(m.root)}</i></span>
+      ${m.widgets.map(w => `<span class="wbox${w.lp ? " lp-" + w.lp : ""}" style="left:${w.x}%;top:${w.y}%;width:${w.w}%;height:${w.h}%"><i>${esc(w.n)}</i></span>`).join("")}
+    </div>`;
+
   /* ================= explorer component ================= */
   class Explorer {
     constructor(root, project) {
@@ -573,6 +581,7 @@
                 <button type="button" data-m="screens" aria-pressed="true">Real screens</button>
                 <button type="button" data-m="demo" aria-pressed="false">Try it</button>
               </div>
+              <label class="w-toggle" hidden><input type="checkbox"><span class="sw" aria-hidden="true"></span>Show Flutter widgets</label>
               <p class="feat-hint"></p>
               <button type="button" class="ghost cmp" aria-pressed="false">Compare with before</button>
             </div>
@@ -589,6 +598,8 @@
       });
       this.cmp = this.root.querySelector(".cmp");
       this.cmp.addEventListener("click", () => { this.compare = !this.compare; this.show(this.i, true); });
+      this.wt = this.root.querySelector(".w-toggle");
+      this.wt.querySelector("input").addEventListener("change", e => this.root.querySelector(".shots").classList.toggle("inspect", e.target.checked));
       this.root.querySelectorAll(".mode button").forEach(b => b.addEventListener("click", () => { this.mode = b.dataset.m; this.show(this.i, true); }));
     }
     show(k, keepMode) {
@@ -614,6 +625,7 @@
       ul.innerHTML = f.built.map(x => `<li>${esc(x)}</li>`).join("");
       r.querySelector(".feat-built-wrap").hidden = !f.built.length;
       const demoMode = this.mode === "demo";
+      if (demoMode) this.wt.hidden = true;
       r.querySelector(".feat-hint").textContent = demoMode ? (f.hint || "")
         : f.shotsHint || (hasShots && f.shots.length > 2 ? "Scroll the screens sideways to see more." : "");
       const modeEl = r.querySelector(".mode");
@@ -627,10 +639,14 @@
       if (!demoMode) {
         shotsEl.innerHTML = f.shots.map((sh, j) => {
           const src = typeof sh === "string" ? sh : sh.src, alt = (f.shotAlts || [])[j] || f.title;
-          return sh.scroll
-            ? `<figure class="shot"><div class="shot-scroll" tabindex="0" aria-label="${esc(alt)}, scrolls">${img(src, alt)}</div></figure>`
-            : `<figure class="shot">${img(src, alt)}</figure>`;
+          if (sh.scroll) return `<figure class="shot"><div class="shot-scroll" tabindex="0" aria-label="${esc(alt)}, scrolls">${img(src, alt)}</div></figure>`;
+          const m = WMAP[src];
+          return m ? `<figure class="shot"><div class="shot-in">${img(src, alt)}${overlay(m)}</div></figure>` : `<figure class="shot">${img(src, alt)}</figure>`;
         }).join("");
+        const mapped = f.shots.some(sh => WMAP[typeof sh === "string" ? sh : sh.src]);
+        this.wt.hidden = !mapped;
+        this.wt.querySelector("input").checked = false;
+        shotsEl.classList.remove("inspect");
         this.compare = false;
         this.cmp.hidden = true;
         r.querySelector(".feat").classList.remove("comparing");
@@ -697,58 +713,137 @@
     new Explorer(sec.querySelector(".explorer"), p);
   });
 
-  /* ================= hero phone: real screens with a widget inspector ================= */
+  /* ================= hero: Flutter hot reload, state kept ================= */
   (() => {
-    const R = D.reel, host = $("#reel");
-    if (!R || !host) return;
-    const slide = (s, i) => {
-      const wh = SIZES[s.src] || [560, 1218];
-      return `<div class="reel-slide${i ? "" : " on"}" style="background:${s.bg}" aria-hidden="${i ? "true" : "false"}">
-        <div class="reel-shot">
-          <img src="${esc(s.src)}" alt="${esc(s.alt)}" width="${wh[0]}" height="${wh[1]}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'} decoding="async">
-          <div class="reel-ov" aria-hidden="true">
-            <span class="wbox root"><i>${esc(s.root)}</i></span>
-            ${s.widgets.map(w => `<span class="wbox${w.lp ? " lp-" + w.lp : ""}" style="left:${w.x}%;top:${w.y}%;width:${w.w}%;height:${w.h}%"><i>${esc(w.n)}</i></span>`).join("")}
+    const host = $("#hotreload");
+    if (!host) return;
+    // Tokens: [class, text, key?]. Keys mark the values the demo edits.
+    const L = [
+      [["t", "int"], ["", " people = "], ["n", "2"], ["", ";  "], ["c", "// state"]],
+      [],
+      [["t", "Widget"], ["", " "], ["f", "build"], ["", "(context) {"]],
+      [["", "  "], ["k", "return"], ["", " "], ["t", "BillCard"], ["", "("]],
+      [["", "    title: "], ["s", "'Dinner'", "title"], ["", ","]],
+      [["", "    total: "], ["n", "2400", "total"], ["", ","]],
+      [["", "    color: "], ["t", "Color"], ["", "("], ["n", "0xFF1A2238", "color"], ["", "),"]],
+      [["", "    radius: "], ["n", "12", "radius"], ["", ","]],
+      [["", "    onAdd: () => "], ["f", "setState"], ["", "(() => people++),"]],
+      [["", "  );"]],
+      [["", "}"]]
+    ];
+    const EDITS = [
+      ["title", "'Goa trip'"], ["color", "0xFF0F7B6C"], ["radius", "28"], ["total", "18600"],
+      ["title", "'Dinner'"], ["color", "0xFF1A2238"], ["radius", "12"], ["total", "2400"]
+    ];
+    const NAMES = ["Asha", "Bibek", "Chirag", "Divya", "Esha", "Farhan"];
+    const TINTS = ["#E9A400", "#7FA7E8", "#E58C6A", "#9CC59A", "#C9A2E0", "#F2C46B"];
+    const code = L.map(line => `<span class="ln">${line.map(([c, t, k]) =>
+      `<span${c ? ` class="tk-${c}"` : ""}${k ? ` data-k="${k}"` : ""}>${esc(t)}</span>`).join("") || " "}</span>`).join("");
+    host.innerHTML = `
+      <div class="hr-ed" aria-hidden="true">
+        <div class="hr-bar"><span class="hr-file">split_bill.dart</span><span class="hr-bolt">⚡ Hot reload</span></div>
+        <pre class="hr-code"><code>${code}</code></pre>
+      </div>
+      <div class="hr-prev">
+        <div class="bc">
+          <div class="bc-top"><span class="bc-title">Dinner</span><span class="bc-total">₹2,400</span></div>
+          <div class="bc-people" aria-hidden="true"></div>
+          <div class="bc-foot">
+            <span class="bc-each"></span>
+            <span class="bc-btns">
+              <button type="button" class="bc-minus" aria-label="Remove a person">−</button>
+              <button type="button" class="bc-plus" aria-label="Add a person">+</button>
+            </span>
           </div>
         </div>
-      </div>`;
-    };
-    host.innerHTML = `
-      <div class="reel-phone"><div class="island"></div><div class="reel-screen">${R.map(slide).join("")}</div></div>
-      <figcaption class="reel-bar">
-        <a class="reel-app" href="#p-${R[0].project}">${esc(R[0].app)}</a>
-        <span class="reel-dots">${R.map((s, i) => `<button type="button" data-i="${i}" aria-label="Show ${esc(s.app)}" aria-current="${!i}"></button>`).join("")}</span>
-      </figcaption>
-      <label class="reel-toggle"><input type="checkbox" id="reel-inspect"><span class="sw" aria-hidden="true"></span>Show widgets</label>
-      <div class="reel-store" hidden></div>`;
-    const slides = [...host.querySelectorAll(".reel-slide")], dots = [...host.querySelectorAll(".reel-dots button")];
-    const link = host.querySelector(".reel-app"), toggle = host.querySelector("#reel-inspect");
-    let i = 0, timer = null, hover = false, visible = true;
-    const go = (n) => {
-      slides[i].classList.remove("on"); slides[i].setAttribute("aria-hidden", "true");
-      i = (n + R.length) % R.length;
-      slides[i].classList.add("on"); slides[i].setAttribute("aria-hidden", "false");
-      dots.forEach((d, k) => d.setAttribute("aria-current", k === i));
-      link.textContent = R[i].app; link.href = `#p-${R[i].project}`;
-    };
-    const tick = () => {
-      clearInterval(timer); timer = null;
-      if (reduced || toggle.checked || hover || !visible) return;
-      timer = setInterval(() => go(i + 1), 3800);
-    };
-    dots.forEach(d => d.addEventListener("click", () => { go(+d.dataset.i); tick(); }));
-    toggle.addEventListener("change", () => { host.classList.toggle("inspect", toggle.checked); tick(); });
-    host.addEventListener("mouseenter", () => { hover = true; tick(); });
-    host.addEventListener("mouseleave", () => { hover = false; tick(); });
-    if ("IntersectionObserver" in window) new IntersectionObserver(([e]) => { visible = e.isIntersecting; tick(); }).observe(host);
-    tick();
+        <p class="hr-status" aria-live="polite">Tap <b>+</b> or <b>−</b>, then watch the next reload keep it.</p>
+      </div>
+      <figcaption class="hr-cap">Flutter hot reload: the code changes, the state stays.</figcaption>`;
 
-    /* Live on the App Store: versions refreshed by the deploy workflow */
-    const fmt = d => new Date(d + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    const q = s => host.querySelector(s);
+    const tok = k => q(`[data-k="${k}"]`);
+    const card = q(".bc"), status = q(".hr-status"), bolt = q(".hr-bolt");
+    const st = { title: "'Dinner'", total: "2400", color: "0xFF1A2238", radius: "12" };
+    let people = 2, touched = false;
+
+    const inr = n => "₹" + Math.round(n).toLocaleString("en-IN");
+    const render = () => {
+      const hex = "#" + st.color.slice(4);
+      card.style.setProperty("--bc", hex);
+      card.style.setProperty("--br", st.radius + "px");
+      q(".bc-title").textContent = st.title.replace(/'/g, "");
+      q(".bc-total").textContent = inr(+st.total);
+      q(".bc-each").textContent = `${inr(+st.total / people)} each`;
+      q(".bc-people").innerHTML = NAMES.slice(0, people).map((n, i) =>
+        `<span style="background:${TINTS[i]}">${n[0]}</span>`).join("");
+      q(".bc-minus").disabled = people <= 1;
+      q(".bc-plus").disabled = people >= NAMES.length;
+    };
+    const change = (d, byUser) => {
+      people = Math.max(1, Math.min(NAMES.length, people + d));
+      if (byUser) touched = true;
+      render();
+      status.innerHTML = `State: <b>people = ${people}</b>. The code still says 2.`;
+    };
+    q(".bc-plus").addEventListener("click", () => change(1, true));
+    q(".bc-minus").addEventListener("click", () => change(-1, true));
+    render();
+
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    let visible = true, wake = null;
+    const ready = () => (visible && !document.hidden) ? Promise.resolve() : new Promise(r => { wake = r; });
+    const check = () => { if (visible && !document.hidden && wake) { wake(); wake = null; } };
+    if ("IntersectionObserver" in window) new IntersectionObserver(([e]) => { visible = e.isIntersecting; check(); }).observe(host);
+    document.addEventListener("visibilitychange", check);
+
+    const tap = async (sel, d) => {
+      const b = q(sel);
+      b.classList.add("tap"); await sleep(260);
+      change(d, false); await sleep(240); b.classList.remove("tap");
+    };
+    const edit = async ([k, v]) => {
+      const el = tok(k);
+      if (reduced) { el.textContent = v; }
+      else {
+        el.classList.add("sel"); await sleep(520);
+        el.classList.remove("sel"); el.textContent = ""; el.classList.add("typing");
+        for (const ch of v) { el.textContent += ch; await sleep(55); }
+        el.classList.remove("typing"); await sleep(320);
+      }
+      st[k] = v;
+      bolt.classList.remove("flash"); void bolt.offsetWidth; bolt.classList.add("flash");
+      card.classList.add("reloaded");
+      render();
+      status.innerHTML = `⚡ Reloaded <b>${k}</b>. State kept: <b>people = ${people}</b>.`;
+      await sleep(500); card.classList.remove("reloaded");
+    };
+
+    (async () => {
+      await sleep(1200);
+      let n = 0;
+      for (;;) {
+        await ready();
+        // Change the state now and then, so the reload visibly keeps it.
+        if (!touched && n % 4 === 0 && !reduced) {
+          await tap(people >= 4 ? ".bc-minus" : ".bc-plus", people >= 4 ? -1 : 1);
+          await sleep(1300);
+          await ready();
+        }
+        await edit(EDITS[n % EDITS.length]);
+        n++;
+        await sleep(reduced ? 5000 : 2600);
+      }
+    })();
+  })();
+
+  /* Live on the App Store: versions refreshed by the deploy workflow */
+  (() => {
+    const box = $("#hero-store");
+    if (!box) return;
     fetch("assets/store.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).then(st => {
       if (!st || !st.apps || !st.apps.length) return;
-      const box = host.querySelector(".reel-store");
-      box.innerHTML = `<p>Live on the App Store</p><ul>${st.apps.map(a => `<li><a href="https://apps.apple.com/in/app/id${esc(a.id)}" target="_blank" rel="noopener">${esc(a.name)}</a><span>v${esc(a.version)}, ${fmt(a.released)}</span></li>`).join("")}</ul>`;
+      box.innerHTML = `<span>Live on the App Store:</span> ${st.apps.map(a =>
+        `<a href="https://apps.apple.com/in/app/id${esc(a.id)}" target="_blank" rel="noopener">${esc(a.name)} <em>v${esc(a.version)}</em></a>`).join("")}`;
       box.hidden = false;
     }).catch(() => {});
   })();

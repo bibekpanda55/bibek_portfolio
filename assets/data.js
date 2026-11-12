@@ -6,9 +6,9 @@ window.PORTFOLIO = {
     { label: "github.com/bibekpanda55", href: "https://github.com/bibekpanda55" }
   ],
 
-  /* Hero phone: one real screen per app. Boxes are widget outlines in % of the screenshot,
-     named after the actual widget classes in each app's code. */
-  reel: [
+  /* "Show widgets" overlays for real screenshots in the project sections. Boxes are widget
+     outlines in % of the screenshot, named after the actual widget classes in each app's code. */
+  widgetMaps: [
     {
       app: "Innopay Messenger", project: "innopay", root: "MessengerHomeScreen",
       src: "assets/img/innopay/messenger/chats.webp", bg: "#FFFFFF",
