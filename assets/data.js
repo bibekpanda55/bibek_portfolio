@@ -205,6 +205,15 @@ window.PORTFOLIO = {
             "Background notifications on Android and iOS through native channels, with a sound toggle",
             "Moved the app's state management from GetX to Riverpod"
           ],
+          shots: ["login", "home", "settlements", "qr", "transaction"].map(n => `assets/img/business/${n}.webp`),
+          shotAlts: [
+            "OTP verification with the code filled in and a resend timer",
+            "Home with today's total received and a list of transactions marked success or failed",
+            "Settlements tab with today's total and each settlement",
+            "A QR code for a fixed amount of ₹500 that customers scan with any UPI app",
+            "Transaction details sheet with payer, transaction ID, status and date"
+          ],
+          shotsHint: "Screens from the Innopay Business design.",
           demo: "merchant",
           hint: "A payment arrives every few seconds."
         }
